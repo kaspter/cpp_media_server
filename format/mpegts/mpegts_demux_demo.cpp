@@ -1,3 +1,4 @@
+#include "logger.hpp"
 #include "mpegts_demux.hpp"
 #include "av_format_interface.hpp"
 #include <string>

@@ -5,6 +5,8 @@
 #include <chrono>
 #include <random>
 #include <cstring>
+#include <openssl/hmac.h>
+#include <openssl/ssl.h>
 
 uint8_t byte_crypto::hmac_sha1_buffer[20];
 HMAC_CTX* byte_crypto::hmac_sha1_ctx = nullptr;

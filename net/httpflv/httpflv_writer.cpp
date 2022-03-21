@@ -18,9 +18,6 @@ httpflv_writer::~httpflv_writer()
 }
 
 int httpflv_writer::send_flv_header() {
-    /*|'F'(8)|'L'(8)|'V'(8)|version(8)|TypeFlagsReserved(5)|TypeFlagsAudio(1)|TypeFlagsReserved(1)|TypeFlagsVideo(1)|DataOffset(32)|PreviousTagSize(32)|*/
-    uint8_t flag = 0;
-
     if (flv_header_ready_) {
         return 0;
     }
@@ -28,13 +25,15 @@ int httpflv_writer::send_flv_header() {
     if (!has_audio_ && !has_video_) {
         return -1;
     }
+
+    uint8_t flag = 0;
     if (has_video_) {
         flag |= 0x01;
     }
     if (has_audio_) {
         flag |= 0x04;
     }
-
+    /*|'F'(8)|'L'(8)|'V'(8)|version(8)|TypeFlagsReserved(5)|TypeFlagsAudio(1)|TypeFlagsReserved(1)|TypeFlagsVideo(1)|DataOffset(32)|PreviousTagSize(32)|*/
     uint8_t flv_header[] = {0x46, 0x4c, 0x56, 0x01, flag, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00};
 
     resp_->write((char*)flv_header, sizeof(flv_header), true);

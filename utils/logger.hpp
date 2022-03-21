@@ -24,6 +24,7 @@ public:
     void set_filename(const std::string filename);
     void set_level(enum LOGGER_LEVEL level);
     enum LOGGER_LEVEL get_level();
+
     char* get_buffer();
     
     void logf(const char* level, const char* buffer, const char* filename, int line);
@@ -41,13 +42,10 @@ private:
 
 inline void snprintbuffer(char* buffer, size_t size, const char* fmt, ...) {
     va_list ap;
- 
     va_start(ap, fmt);
     int ret_len = vsnprintf(buffer, size, fmt, ap);
     buffer[ret_len] = 0;
     va_end(ap);
-
-    return;
 }
 
 #define log_errorf(...) \
@@ -84,11 +82,10 @@ inline void snprintbuffer(char* buffer, size_t size, const char* fmt, ...) {
 
 inline void log_info_data(const uint8_t* data, int len, const char* dscr) {
     char print_data[10*1024];
-    size_t print_len = 0;
     const int MAX_LINES = 5;
     int line = 0;
 
-    print_len += snprintf(print_data, sizeof(print_data), "%s:", dscr);
+    size_t print_len = snprintf(print_data, sizeof(print_data), "%s:", dscr);
     for (int index = 0; index < len; index++) {
         if ((index%16) == 0) {
             print_len += snprintf(print_data + print_len, sizeof(print_data) - print_len, "\r\n");

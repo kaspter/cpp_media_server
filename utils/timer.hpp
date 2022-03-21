@@ -28,13 +28,12 @@ public:
             if (!this->running_) {
                 return;
             }
-            if(!ec) {
-                this->on_timer();
-            } else {
-                log_errorf("timer error:%s, value:%d",
-                    ec.message().c_str(), ec.value())
+            if (ec) {
+                log_errorf("timer error:%s, value:%d", ec.message().c_str(), ec.value())
                 return;
             }
+
+            this->on_timer();
             this->start_timer();
         });
     }

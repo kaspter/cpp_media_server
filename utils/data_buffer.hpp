@@ -1,11 +1,9 @@
 #ifndef DATA_BUFFER_H
 #define DATA_BUFFER_H
-#include "logger.hpp"
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 #include <string>
-#include <vector>
 #include <memory>
 
 #define EXTRA_LEN (10*1024)

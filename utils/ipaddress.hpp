@@ -1,5 +1,6 @@
 #ifndef IP_ADDRESS_HPP
 #define IP_ADDRESS_HPP
+
 #include <arpa/inet.h>  // htonl(), htons(), ntohl(), ntohs()
 #include <netinet/in.h> // sockaddr_in, sockaddr_in6
 #include <sys/socket.h> // struct sockaddr, struct sockaddr_storage, AF_INET, AF_INET6

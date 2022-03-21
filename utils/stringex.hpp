@@ -3,6 +3,7 @@
 
 #include <random>
 #include <string>
+#include <vector>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>

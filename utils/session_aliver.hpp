@@ -1,15 +1,13 @@
 #ifndef SESSION_ALIVER_HPP
 #define SESSION_ALIVER_HPP
-#include <stdint.h>
-#include <stddef.h>
 
 class session_aliver
 {
 public:
     session_aliver(int try_max = 4):try_max_(try_max) {
     }
-    ~session_aliver() {
 
+    ~session_aliver() {
     }
 
 public:

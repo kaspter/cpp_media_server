@@ -5,16 +5,15 @@
 
 #define STREAM_STATICS_INTERVAL_MAX (10*1000)
 
-#define STREAM_STATICS_INTErVAL_DEFAULT (2*1000)
+#define STREAM_STATICS_INTERVAL_DEFAULT (2*1000)
 
 class stream_statics
 {
 public:
     stream_statics() {
-
     }
-    ~stream_statics() {
 
+    ~stream_statics() {
     }
 
     void update(size_t bytes, int64_t now_ms) {

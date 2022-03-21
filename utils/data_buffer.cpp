@@ -1,3 +1,4 @@
+#include "logger.hpp"
 #include "data_buffer.hpp"
 #include <cstring>
 
@@ -11,25 +12,13 @@ data_buffer::data_buffer(size_t data_size) {
 }
 
 data_buffer::data_buffer(const data_buffer& input) {
-    sent_flag_     = input.sent_flag_;
-    dst_ip_        = input.dst_ip_;
-    dst_port_      = input.dst_port_;
-
-
-    buffer_        = new char[input.buffer_size_ + PRE_RESERVE_HEADER_SIZE];
-    buffer_size_   = input.buffer_size_;
-    data_len_      = input.data_len_;
-    start_         = input.start_;
-    end_           = input.end_;
-
-    memcpy(buffer_, input.buffer_, data_len_);
+    *this = input;
 }
 
 data_buffer& data_buffer::operator=(const data_buffer& input) {
     sent_flag_     = input.sent_flag_;
     dst_ip_        = input.dst_ip_;
     dst_port_      = input.dst_port_;
-
 
     buffer_        = new char[input.buffer_size_ + PRE_RESERVE_HEADER_SIZE];
     buffer_size_   = input.buffer_size_;
@@ -42,8 +31,7 @@ data_buffer& data_buffer::operator=(const data_buffer& input) {
 }
 
 data_buffer::~data_buffer() {
-    if (buffer_)
-    {
+    if (buffer_) {
         delete[] buffer_;
     }
 }
