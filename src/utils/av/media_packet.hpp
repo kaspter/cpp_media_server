@@ -1,5 +1,6 @@
 #ifndef MEDIA_PACKET_HPP
 #define MEDIA_PACKET_HPP
+
 #include "av.hpp"
 #include "data_buffer.hpp"
 
@@ -49,20 +50,7 @@ public:
     }
 
     void copy_properties(const std::shared_ptr<MEDIA_PACKET> pkt_ptr) {
-        this->av_type_      = pkt_ptr->av_type_;
-        this->codec_type_   = pkt_ptr->codec_type_;
-        this->fmt_type_     = pkt_ptr->fmt_type_;
-        this->dts_          = pkt_ptr->dts_;
-        this->pts_          = pkt_ptr->pts_;
-        this->is_key_frame_ = pkt_ptr->is_key_frame_;
-        this->is_seq_hdr_   = pkt_ptr->is_seq_hdr_;
-
-        this->key_        = pkt_ptr->key_;
-        this->vhost_      = pkt_ptr->vhost_;
-        this->app_        = pkt_ptr->app_;
-        this->streamname_ = pkt_ptr->streamname_;
-        this->streamid_   = pkt_ptr->streamid_;
-        this->typeid_     = pkt_ptr->typeid_;
+        copy_properties(*pkt_ptr);
     }
 
     std::string dump() {

@@ -1,5 +1,6 @@
 #ifndef TCP_CLIENT_H
 #define TCP_CLIENT_H
+#include "logger.hpp"
 #include "data_buffer.hpp"
 #include <memory>
 #include <queue>

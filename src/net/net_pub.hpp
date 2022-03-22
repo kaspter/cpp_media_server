@@ -1,8 +1,7 @@
 #ifndef NET_PUB_HPP
 #define NET_PUB_HPP
-#include <memory>
+
 #include <string>
-#include <stdint.h>
 #include <boost/asio.hpp>
 
 inline void make_endpoint_string(boost::asio::ip::tcp::endpoint endpoint, std::string& info) {

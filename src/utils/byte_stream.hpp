@@ -1,5 +1,6 @@
 #ifndef BYTE_STREAM_HPP
 #define BYTE_STREAM_HPP
+
 #include <stdint.h>
 #include <stddef.h>
 

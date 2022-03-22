@@ -1,5 +1,6 @@
 #ifndef STREAM_STATICS_HPP
 #define STREAM_STATICS_HPP
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -11,15 +12,13 @@ class stream_statics
 {
 public:
     stream_statics() {
-
     }
     ~stream_statics() {
-
     }
 
     void update(size_t bytes, int64_t now_ms) {
         bytes_ += bytes;
-        count_ ++;
+        count_ ++; 
         if ((timestamp_ == 0) || ((now_ms - timestamp_) > STREAM_STATICS_INTERVAL_MAX)) {
             timestamp_  = now_ms;
             last_bytes_ = bytes_;
