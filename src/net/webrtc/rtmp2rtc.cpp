@@ -14,7 +14,7 @@ rtmp2rtc_writer::~rtmp2rtc_writer() {
 }
 
 int rtmp2rtc_writer::write_packet(MEDIA_PACKET_PTR pkt_ptr) {
-    if (!Config::webrtc_is_enable()) {
+    if (!Config::Instance()->webrtc_is_enable()) {
         return 0;
     }
     if (pkt_ptr->app_.empty() || pkt_ptr->streamname_.empty()) {

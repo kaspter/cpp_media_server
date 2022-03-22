@@ -204,9 +204,10 @@ public:
 class Config
 {
 public:
-    static int load(const std::string& conf_file);
+    int load(const std::string& conf_file);
+    static Config* Instance();
 
-    static std::string dump() {
+    std::string dump() {
         std::stringstream ss;
 
         ss << "log file path:" << log_path_ << "\r\n";
@@ -222,75 +223,72 @@ public:
     }
 
 public:
-    static bool rtmp_is_enable();
-    static uint16_t rtmp_listen_port();
-    static bool rtmp_gop_cache();
-    static bool rtmp_relay_is_enable();
-    static std::string rtmp_relay_host();
+    bool rtmp_is_enable();
+    uint16_t rtmp_listen_port();
+    bool rtmp_gop_cache();
+    bool rtmp_relay_is_enable();
+    std::string rtmp_relay_host();
 
 public:
-    static bool httpflv_is_enable();
-    static bool httpflv_ssl_enable();
-    static std::string httpflv_cert_file();
-    static std::string httpflv_key_file();
-    static uint16_t httpflv_port();
+    bool httpflv_is_enable();
+    bool httpflv_ssl_enable();
+    std::string httpflv_cert_file();
+    std::string httpflv_key_file();
+    uint16_t httpflv_port();
 
 public:
-    static bool httpapi_is_enable();
-    static bool httpapi_ssl_enable();
-    static std::string httpapi_cert_file();
-    static std::string httpapi_key_file();
-    static uint16_t httpapi_port();
+    bool httpapi_is_enable();
+    bool httpapi_ssl_enable();
+    std::string httpapi_cert_file();
+    std::string httpapi_key_file();
+    uint16_t httpapi_port();
 
 public:
-    static bool hls_is_enable();
-    static std::string hls_path();
-    static int mpegts_duration();
+    bool hls_is_enable();
+    std::string hls_path();
+    int mpegts_duration();
 
 public:
-    static bool webrtc_is_enable();
-    static uint16_t webrtc_https_port();
-    static std::string tls_key();
-    static std::string tls_cert();
-    static uint16_t webrtc_udp_port();
-    static std::string candidate_ip();
-    static bool rtmp2rtc_is_enable();
-    static bool rtc2rtmp_is_enable();
+    bool webrtc_is_enable();
+    uint16_t webrtc_https_port();
+    std::string tls_key();
+    std::string tls_cert();
+    uint16_t webrtc_udp_port();
+    std::string candidate_ip();
+    bool rtmp2rtc_is_enable();
+    bool rtc2rtmp_is_enable();
 
 public:
-    static bool websocket_is_enable();
-    static uint16_t websocket_port();
+    bool websocket_is_enable();
+    uint16_t websocket_port();
 
 public:
-    static std::string log_filename() { return log_path_; }
-    static enum LOGGER_LEVEL log_level() { return log_level_; }
+    std::string log_filename() { return log_path_; }
+    enum LOGGER_LEVEL log_level() { return log_level_; }
 
 private:
-    static int init(uint8_t* data, size_t len);
-    static int init_log(json& json_object);
-    static int init_rtmp(json& json_object);
-    static int init_httpflv(json& json_object);
-    static int init_hls(json& json_object);
-    static int init_webrtc(json& json_object);
-    static int init_websocket(json& json_object);
-    static int init_httpapi(json& json_object);
+    int init(uint8_t* data, size_t len);
+    int init_log(json& json_object);
+    int init_rtmp(json& json_object);
+    int init_httpflv(json& json_object);
+    int init_hls(json& json_object);
+    int init_webrtc(json& json_object);
+    int init_websocket(json& json_object);
+    int init_httpapi(json& json_object);
+
 
 private:
-    static Config* s_config_;
-    static uint8_t buffer_[CONFIG_DATA_BUFFER];
+    std::string log_level_str_;//"error","info", "warning"
+    enum LOGGER_LEVEL log_level_;
+    std::string log_path_;
 
 private:
-    static std::string log_level_str_;//"error","info", "warning"
-    static enum LOGGER_LEVEL log_level_;
-    static std::string log_path_;
-
-private:
-    static RtmpConfig rtmp_config_;
-    static HttpflvConfig httpflv_config_;
-    static HlsConfig hls_config_;
-    static WebrtcConfig webrtc_config_;
-    static WebSocketConfg websocket_config_;
-    static HttpApiConfig httpapi_config_;
+    RtmpConfig rtmp_config_;
+    HttpflvConfig httpflv_config_;
+    HlsConfig hls_config_;
+    WebrtcConfig webrtc_config_;
+    WebSocketConfg websocket_config_;
+    HttpApiConfig httpapi_config_;
 };
 
 #endif

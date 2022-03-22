@@ -1,5 +1,5 @@
 # 1. flv module
-几个cpp和hpp就能完成mpegts的mux/demux
+几个cpp和hpp就能完成flv的mux/demux
 
 ## 1.1 flv demux
 只需要编译如下文件，就能完成一个flv demux的操作，举例:

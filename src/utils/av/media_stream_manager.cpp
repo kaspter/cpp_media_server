@@ -10,6 +10,7 @@ av_writer_base* media_stream_manager::hls_writer_ = nullptr;
 av_writer_base* media_stream_manager::r2r_writer_ = nullptr;
 
 PLAY_CALLBACK media_stream_manager::play_cb_ = nullptr;
+void* media_stream_manager::play_data_ = nullptr;
 
 bool media_stream_manager::get_app_streamname(const std::string& stream_key, std::string& app, std::string& streamname) {
     size_t pos = stream_key.find("/");
@@ -33,7 +34,7 @@ int media_stream_manager::add_player(av_writer_base* writer_p) {
         log_infof("add player request:%s(%s) in new writer list", key_str.c_str(), writerid.c_str());
         
         if (play_cb_) {
-            play_cb_(key_str);
+            play_cb_(key_str, play_data_);
         }
     } 
     else {
@@ -135,8 +136,9 @@ PLAY_CALLBACK media_stream_manager::get_play_callback() {
     return play_cb_;
 }
 
-void media_stream_manager::set_play_callback(PLAY_CALLBACK cb) {
+void media_stream_manager::set_play_callback(PLAY_CALLBACK cb, void* data) {
     play_cb_ = cb;
+    play_data_ = data;
 }
 
 int media_stream_manager::writer_media_packet(MEDIA_PACKET_PTR pkt_ptr) {

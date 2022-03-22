@@ -207,7 +207,7 @@ void rtc_publisher::on_handle_rtppacket(rtp_packet* pkt) {
         return;
     }
     
-    if ( Config::rtmp_is_enable() && Config::rtc2rtmp_is_enable()
+    if ( Config::Instance()->rtmp_is_enable() && Config::Instance()->rtc2rtmp_is_enable()
         && ( ((media_type_ == MEDIA_VIDEO_TYPE) 
         && (codec_type_ == MEDIA_CODEC_H264))
         || (media_type_ == MEDIA_AUDIO_TYPE)) ) {

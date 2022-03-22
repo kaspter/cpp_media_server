@@ -5,26 +5,19 @@
 #include "logger.hpp"
 using json = nlohmann::json;
 
-Config* Config::s_config_ = nullptr;
-uint8_t Config::buffer_[CONFIG_DATA_BUFFER];
-std::string Config::log_level_str_;//"error","info", "warning"
-std::string Config::log_path_;
-enum LOGGER_LEVEL Config::log_level_;
+Config* Config::Instance(){
+    static Config s_config;
+    return &s_config;
+}
 
-RtmpConfig     Config::rtmp_config_;
-HttpflvConfig  Config::httpflv_config_;
-HttpApiConfig  Config::httpapi_config_;
-HlsConfig      Config::hls_config_;
-WebrtcConfig   Config::webrtc_config_;
-WebSocketConfg Config::websocket_config_;
-
+#define CONFIG_DATA_BUFFER (30*1000)
 int Config::load(const std::string& conf_file) {
     FILE* fh_p = fopen(conf_file.c_str(), "r");
     if (!fh_p) {
         std::cout << "open file:" << conf_file << " error\r\n";
         return -1;
     }
-
+    uint8_t buffer_[CONFIG_DATA_BUFFER];
     size_t n = fread(buffer_, 1, CONFIG_DATA_BUFFER, fh_p);
     fclose(fh_p);
 
