@@ -1,11 +1,13 @@
 #ifndef BYTE_CRYTO_HPP
 #define BYTE_CRYTO_HPP
+
 #include <stdint.h>
 #include <stddef.h>
 #include <string>
 #include <random>
-#include <openssl/hmac.h>
-#include <openssl/ssl.h>
+
+struct hmac_ctx_st;
+typedef struct hmac_ctx_st HMAC_CTX;
 
 #define SHA1_BUFFER_SIZE 20
 

@@ -1,5 +1,6 @@
 #ifndef TCP_CLIENT_H
 #define TCP_CLIENT_H
+#include "logger.hpp"
 #include "data_buffer.hpp"
 #include "utils/logger.hpp"
 #include "tcp_pub.hpp"

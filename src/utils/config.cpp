@@ -2,7 +2,7 @@
 #include "json.hpp"
 #include <stdio.h>
 #include <iostream>
-
+#include "logger.hpp"
 using json = nlohmann::json;
 
 Config* Config::s_config_ = nullptr;

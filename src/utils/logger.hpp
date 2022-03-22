@@ -45,13 +45,10 @@ private:
 
 inline void snprintbuffer(char* buffer, size_t size, const char* fmt, ...) {
     va_list ap;
- 
     va_start(ap, fmt);
     int ret_len = vsnprintf(buffer, size, fmt, ap);
     buffer[ret_len] = 0;
     va_end(ap);
-
-    return;
 }
 
 #define log_errorf(...) \

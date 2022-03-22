@@ -4,8 +4,6 @@
 #include <uv.h>
 #include <stdint.h>
 
-inline void on_uv_timer_callback(uv_timer_t *handle);
-
 class timer_interface
 {
 public:
@@ -13,8 +11,6 @@ public:
     {
         uv_timer_init(loop, &timer_);
         timer_.data = this;
-
-        
     }
 
     virtual ~timer_interface() {
@@ -26,8 +22,15 @@ public:
     virtual void on_timer() = 0;
 
 public:
+    static void on_uv_timer_callback(uv_timer_t *handle) {
+        timer_interface* timer = (timer_interface*)handle->data;
+        if (timer) {
+            timer->on_timer();
+        }
+    }
+    
     void start_timer() {
-        if(running_) {
+        if (running_) {
             return;
         }
         running_ = true;
@@ -43,16 +46,12 @@ public:
     }
 
 private:
+
     uv_timer_t timer_;
     uint32_t timeout_ms_;
     bool running_ = false;
 };
 
-inline void on_uv_timer_callback(uv_timer_t *handle) {
-    timer_interface* timer = (timer_interface*)handle->data;
-    if (timer) {
-        timer->on_timer();
-    }
-}
+
 
 #endif

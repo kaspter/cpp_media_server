@@ -9,7 +9,6 @@ public:
     session_aliver(int try_max = 4):try_max_(try_max) {
     }
     ~session_aliver() {
-
     }
 
 public:
@@ -18,10 +17,7 @@ public:
     }
 
     bool is_alive() {
-        if (not_alive_cnt_++ > try_max_) {
-            return false;
-        }
-        return true;
+        return not_alive_cnt_++ <= try_max_;
     }
 
     void update_max(int max) { try_max_ = max; }

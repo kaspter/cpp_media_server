@@ -1,3 +1,4 @@
+#include "logger.hpp"
 #include "data_buffer.hpp"
 #include "logger.hpp"
 #include <cstring>
