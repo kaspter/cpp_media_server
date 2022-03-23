@@ -147,12 +147,10 @@ public:
         uint8_t data[amf_len];
         uint8_t* p     = data;
 
-        *p = (uint8_t)AMF_DATA_TYPE_NUMBER;
-        p++;
+        *p++ = (uint8_t)AMF_DATA_TYPE_NUMBER;
 
         uint64_t number = byte_double2int(num);
-        write_8bytes(p, number);
-        p += 8;
+        p = write_8bytes(p, number);
 
         buffer.append_data((char*)data, amf_len);
         return RTMP_OK;
@@ -189,8 +187,7 @@ public:
                 p++;
                 amf_len++;
             }
-            write_4bytes(p, str_len);
-            p += 4;
+            p = write_4bytes(p, str_len);
             memcpy(p, str.c_str(), str_len);
 
             buffer.append_data((char*)data, amf_len);
@@ -206,8 +203,7 @@ public:
                 p++;
                 amf_len++;
             }
-            write_2bytes(p, str_len);
-            p += 2;
+            p = write_2bytes(p, str_len);
             if (str_len > 0) {
                 memcpy(p, str.c_str(), str_len);
             }

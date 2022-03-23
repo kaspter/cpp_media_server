@@ -181,18 +181,15 @@ int mpegts_mux::generate_pat() {
     // section_syntax_indicator = '1'
     // '0'
     // reserved '11'
-    write_2bytes(p, (uint16_t)(0xb000 | len));
-    p += 2;
+    p = write_2bytes(p, (uint16_t)(0xb000 | len));
 
     // transport_stream_id
-    write_2bytes(p, transport_stream_id_);
-    p += 2;
+    p = write_2bytes(p, transport_stream_id_);
 
     // reserved '11'
     // version_number 'xxxxx'
     // current_next_indicator '1'
-    *p = 0xc1 | (pat_ver_ << 1);
-    p++;
+    *p++ = 0xc1 | (pat_ver_ << 1);
 
     // section_number/last_section_number
     *p++ = 0;
@@ -200,16 +197,14 @@ int mpegts_mux::generate_pat() {
 
     for(size_t i = 0; i < pmt_count_; i++)
     {
-        write_2bytes(p + i * 4 + 0, program_number_);
-        write_2bytes(p + i * 4 + 2, (uint16_t)(0xE000 | pmt_pid_));
+        p = write_2bytes(p, program_number_);
+        p = write_2bytes(p, (uint16_t)(0xE000 | pmt_pid_));
     }
-    p += 4 * pmt_count_;
 
     // crc32
     uint32_t crc = mpeg_crc32(0xffffffff, pat_data_ + 6, len);
     
-    write_4bytes(p, crc);
-    p += 4;
+    p = write_4bytes(p, crc);
 
     memset(p, 0xff, pat_data_ + TS_PACKET_SIZE - p);
     return (int)(p - pat_data_);
@@ -251,15 +246,13 @@ int mpegts_mux::generate_pmt() {
     uint8_t* data = pmt_data_ + 5;
     uint8_t* p = data;
 
-    p[0] = PAT_TID_PMS;
-    p++;
+    *p++ = PAT_TID_PMS;
 
     // skip section_length
     p += 2;
 
     // program_number
-    write_2bytes(p, pmt_pn);//0x00 01
-    p += 2;
+    p = write_2bytes(p, pmt_pn);//0x00 01
     
     // reserved '11'
     // version_number 'xxxxx'
@@ -272,12 +265,10 @@ int mpegts_mux::generate_pmt() {
 
     // reserved '111'
     // PCR_PID 13-bits 0x1FFF
-    write_2bytes(p, (uint16_t)(0xE000 | pcr_id_));
-    p += 2;
+    p = write_2bytes(p, (uint16_t)(0xE000 | pcr_id_));
 
     //assert(pmt->pminfo_len < 0x400);
-    write_2bytes(p, (uint16_t)(0xF000 | pminfo_len_));
-    p += 2;
+    p = write_2bytes(p, (uint16_t)(0xF000 | pminfo_len_));
     
     //TODO: set pminfo, there is no pm infor usually.
 
@@ -312,8 +303,7 @@ int mpegts_mux::generate_pmt() {
 
         // reserved '111'
         // elementary_PID 13-bits
-        write_2bytes(p, 0xE000 | video_pid_);
-        p += 2;
+        p = write_2bytes(p, 0xE000 | video_pid_);
 
         // reserved '1111'
         // ES_info_length 12-bits
@@ -377,8 +367,7 @@ int mpegts_mux::generate_pmt() {
 
         // reserved '111'
         // elementary_PID 13-bits
-        write_2bytes(p, 0xE000 | audio_pid_);
-        p += 2;
+        p = write_2bytes(p, 0xE000 | audio_pid_);
 
         // reserved '1111'
         // ES_info_length 12-bits

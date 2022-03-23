@@ -295,10 +295,8 @@ void stun_packet::serialize() {
     type_field |= ((uint16_t)(this->stun_class) & 0x01) << 4;
 
     
-    write_2bytes(p, type_field);
-    p += 2;
-    write_2bytes(p, (uint16_t)(this->data_len - STUN_HEADER_SIZE));
-    p += 2;
+    p = write_2bytes(p, type_field);
+    p = write_2bytes(p, (uint16_t)(this->data_len - STUN_HEADER_SIZE));
 
     //wait to write data len
     memcpy(p, stun_packet::magic_cookie, 4);
@@ -308,54 +306,39 @@ void stun_packet::serialize() {
 
     //start set attributes
     if (!this->user_name.empty()) {
-        write_2bytes(p, (uint16_t)STUN_USERNAME);
-        p += 2;
-        write_2bytes(p, (uint16_t)(this->user_name.length()));
-        p += 2;
+        p = write_2bytes(p, (uint16_t)STUN_USERNAME);
+        p = write_2bytes(p, (uint16_t)(this->user_name.length()));
         memcpy(p, this->user_name.c_str(), this->user_name.length());
         p += user_name_pad_len;
     }
 
     if (this->priority) {
-        write_2bytes(p, (uint16_t)STUN_PRIORITY);
-        p += 2;
-        write_2bytes(p, 4);
-        p += 2;
-        write_4bytes(p, this->priority);
-        p += 4;
+        p = write_2bytes(p, (uint16_t)STUN_PRIORITY);
+        p = write_2bytes(p, 4);
+        p = write_4bytes(p, this->priority);
     }
 
     if (this->ice_controlling) {
-        write_2bytes(p, (uint16_t)STUN_ICE_CONTROLLING);
-        p += 2;
-        write_2bytes(p, 8);
-        p += 2;
-        write_8bytes(p, this->ice_controlling);
-        p += 8;
+        p = write_2bytes(p, (uint16_t)STUN_ICE_CONTROLLING);
+        p = write_2bytes(p, 8);
+        p = write_8bytes(p, this->ice_controlling);
     }
 
     if (this->ice_controlled) {
-        write_2bytes(p, (uint16_t)STUN_ICE_CONTROLLED);
-        p += 2;
-        write_2bytes(p, 8);
-        p += 2;
-        write_8bytes(p, this->ice_controlled);
-        p += 8;
+        p = write_2bytes(p, (uint16_t)STUN_ICE_CONTROLLED);
+        p = write_2bytes(p, 8);
+        p = write_8bytes(p, this->ice_controlled);
     }
 
     if (this->has_use_candidate) {
-        write_2bytes(p, (uint16_t)STUN_USE_CANDIDATE);
-        p += 2;
-        write_2bytes(p, 0);
-        p += 2;
+        p = write_2bytes(p, (uint16_t)STUN_USE_CANDIDATE);
+        p = write_2bytes(p, 0);
     }
 
     if (add_xor_address) {
         if (this->xor_address->sa_family == AF_INET) {
-            write_2bytes(p, (uint16_t)STUN_XOR_MAPPED_ADDRESS);
-            p += 2;
-            write_2bytes(p, (uint16_t)8);//AF_INET pad size is 8
-            p += 2;
+            p = write_2bytes(p, (uint16_t)STUN_XOR_MAPPED_ADDRESS);
+            p = write_2bytes(p, (uint16_t)8);//AF_INET pad size is 8
 
             p[0] = 0;
             p[1] = 0x01;//inet family
@@ -378,19 +361,14 @@ void stun_packet::serialize() {
     }
 
     if (add_error) {
-        write_2bytes(p, STUN_ERROR_CODE);
-        p += 2;
-        write_2bytes(p, 4);
-        p += 2;
+        p = write_2bytes(p, STUN_ERROR_CODE);
+        p = write_2bytes(p, 4);
 
         uint8_t code_class  = (uint8_t)(this->error_code / 100);
         uint8_t code_number = (uint8_t)(this->error_code) - (code_class * 100);
-        write_2bytes(p, 0);
-        p += 2;
-        *p = code_class;
-        p++;
-        *p = code_number;
-        p++;
+        p = write_2bytes(p, 0);
+        *p++ = code_class;
+        *p++ = code_number;
     }
 
     if (add_msg_integrity) {
@@ -402,10 +380,8 @@ void stun_packet::serialize() {
 
         uint8_t* caculate_msg_integrity = byte_crypto::get_hmac_sha1(this->password, this->data, pos);
 
-        write_2bytes(p, STUN_MESSAGE_INTEGRITY);
-        p += 2;
-        write_2bytes(p, 20);
-        p += 2;
+        p = write_2bytes(p, STUN_MESSAGE_INTEGRITY);
+        p = write_2bytes(p, 20);
         this->message_integrity = p;
         memcpy(p, caculate_msg_integrity, 20);
         p += 20;
@@ -420,12 +396,9 @@ void stun_packet::serialize() {
         size_t pos = p - this->data;
         uint32_t caculate_fingerprint = byte_crypto::get_crc32(this->data, pos) ^ 0x5354554e;
 
-        write_2bytes(p, STUN_FINGERPRINT);
-        p += 2;
-        write_2bytes(p, 4);
-        p += 2;
-        write_4bytes(p, caculate_fingerprint);
-        p += 4;
+        p = write_2bytes(p, STUN_FINGERPRINT);
+        p = write_2bytes(p, 4);
+        p = write_4bytes(p, caculate_fingerprint);
 
         this->has_fingerprint = true;
     } while(0);
