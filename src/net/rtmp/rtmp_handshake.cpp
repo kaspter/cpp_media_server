@@ -90,9 +90,8 @@ int c1s1_handle::make_c2(char* c2_data) {
 
     rtmp_random_generate(p, 1536);
     uint32_t now_ms = (uint32_t)now_millisec();
-    write_4bytes(p, now_ms);
-    p += 4;
-    write_4bytes(p, s1_time_sec_);
+    p = write_4bytes(p, now_ms);
+    p = write_4bytes(p, s1_time_sec_);
     return ret;
 }
 
@@ -111,14 +110,11 @@ int c1s1_handle::make_c0c1(char* c0c1_data) {
     p++;
 
     //write time and version
-    write_4bytes(p, c1_time_);
-    p += 4;
-    write_4bytes(p, c1_version_);
-    p += 4;
+    p = write_4bytes(p, c1_time_);
+    p = write_4bytes(p, c1_version_);
 
     //write digest
-    write_4bytes(p, c1_digest_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_digest_offset_);
 
     if ((digest_random0_ == nullptr) || (digest_random0_size_ <= 0)) {
         delete[] c1_digest;
@@ -147,12 +143,9 @@ int c1s1_handle::make_c0c1(char* c0c1_data) {
     memcpy(p, key_random1_, key_random1_size_);
     p += key_random1_size_;
 
-    write_4bytes(p, c1_key_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_key_offset_);
 
     assert(p == ((uint8_t*)c0c1_data + 1 + 1536));
-
-
     return ret;
 }
 
@@ -184,10 +177,8 @@ int c1s1_handle::make_s1(char* s1_data) {
     delete[] s1_digest;
 
     uint8_t* p = (uint8_t*)s1_data;
-    write_4bytes(p, s1_time_sec_);
-    p += 4;
-    write_4bytes(p, s1_version_);
-    p += 4;
+    p = write_4bytes(p, s1_time_sec_);
+    p = write_4bytes(p, s1_version_);
 
     if (schema_ == SCHEMA0) {
         make_schema0(p);
@@ -434,14 +425,11 @@ int c1s1_handle::make_c1_scheme1_digest(char*& c1_digest) {
     uint8_t* p = (uint8_t*)c1s1_joined_data;
 
     /* ++++++ c1s1-part1: (time, version, key and digest-part1)++++++ */
-    write_4bytes(p, c1_time_);
-    p += 4;
-    write_4bytes(p, c1_version_);
-    p += 4;
+    p = write_4bytes(p, c1_time_);
+    p = write_4bytes(p, c1_version_);
 
     /* +++++ digest-part1 +++++ */
-    write_4bytes(p, c1_digest_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_digest_offset_);
 
     memcpy(p, digest_random0_, digest_random0_size_);
     p += digest_random0_size_;
@@ -462,8 +450,7 @@ int c1s1_handle::make_c1_scheme1_digest(char*& c1_digest) {
     memcpy(p, key_random1_, key_random1_size_);
     p += key_random1_size_;
 
-    write_4bytes(p, c1_key_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_key_offset_);
 
     assert(p == ((uint8_t*)c1s1_joined_data + 1536 -32));
 
@@ -486,10 +473,8 @@ int c1s1_handle::make_s1_digest(char*& s1_digest) {
     char joined_bytes[JOINED_BYTES_SIZE];
     uint8_t* p = (uint8_t*)joined_bytes;
 
-    write_4bytes(p, s1_time_sec_);
-    p += 4;
-    write_4bytes(p, s1_version_);
-    p += 4;
+    p = write_4bytes(p, s1_time_sec_);
+    p = write_4bytes(p, s1_version_);
 
     /* ++++++ key part ++++++ */
     memcpy(p, key_random0_, key_random0_size_);
@@ -501,12 +486,10 @@ int c1s1_handle::make_s1_digest(char*& s1_digest) {
     memcpy(p, key_random1_, key_random1_size_);
     p += key_random1_size_;
 
-    write_4bytes(p, c1_key_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_key_offset_);
 
     /* ++++++ digest part(no digest inside) ++++++ */
-    write_4bytes(p, c1_digest_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_digest_offset_);
 
     memcpy(p, digest_random0_, digest_random0_size_);
     p += digest_random0_size_;
@@ -542,7 +525,7 @@ int c1s1_handle::make_key(uint8_t* data) {
     memcpy(p, key_random1_, key_random1_size_);
     p += key_random1_size_;
 
-    write_4bytes(p, c1_key_offset_);
+    p = write_4bytes(p, c1_key_offset_);
 
     return 0;
 }
@@ -555,8 +538,7 @@ int c1s1_handle::make_digest(uint8_t* data) {
     //---- random-data: (offset)bytes
     //---- digest-data: 32bytes
     //---- random-data: (764-4-offset-32)bytes
-    write_4bytes(p, c1_digest_offset_);
-    p += 4;
+    p = write_4bytes(p, c1_digest_offset_);
 
     memcpy(p, digest_random0_, digest_random0_size_);
     p += digest_random0_size_;

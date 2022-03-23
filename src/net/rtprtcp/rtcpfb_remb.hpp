@@ -118,8 +118,7 @@ public:
 
         uint8_t* p = (uint8_t*)(remb_block_ + 1);
         for (auto ssrc : ssrcs_) {
-            write_4bytes(p, ssrc);
-            p += sizeof(uint32_t);
+            p = write_4bytes(p, ssrc);
         }
         return data_;
     }

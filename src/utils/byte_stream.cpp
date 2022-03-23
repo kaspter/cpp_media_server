@@ -70,7 +70,7 @@ uint16_t read_2bytes(const uint8_t* data) {
     return value;
 }
 
-void write_8bytes(uint8_t* data, uint64_t value) {
+uint8_t* write_8bytes(uint8_t* data, uint64_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
@@ -82,9 +82,10 @@ void write_8bytes(uint8_t* data, uint64_t value) {
     *p++ = pp[2];
     *p++ = pp[1];
     *p++ = pp[0];
+    return p;
 }
 
-void write_4bytes(uint8_t* data, uint32_t value) {
+uint8_t* write_4bytes(uint8_t* data, uint32_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
@@ -92,17 +93,19 @@ void write_4bytes(uint8_t* data, uint32_t value) {
     *p++ = pp[2];
     *p++ = pp[1];
     *p++ = pp[0];
+    return p;
 }
 
-void write_2bytes_le(uint8_t* data, uint32_t value) {
+uint8_t* write_2bytes_le(uint8_t* data, uint32_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
     *p++ = pp[0];
     *p++ = pp[1];
+    return p;
 }
 
-void write_4bytes_le(uint8_t* data, uint32_t value) {
+uint8_t* write_4bytes_le(uint8_t* data, uint32_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
@@ -110,23 +113,26 @@ void write_4bytes_le(uint8_t* data, uint32_t value) {
     *p++ = pp[1];
     *p++ = pp[2];
     *p++ = pp[3];
+    return p;
 }
 
-void write_3bytes(uint8_t* data, uint32_t value) {
+uint8_t* write_3bytes(uint8_t* data, uint32_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
     *p++ = pp[2];
     *p++ = pp[1];
     *p++ = pp[0];
+    return p;
 }
 
-void write_2bytes(uint8_t* data, uint16_t value) {
+uint8_t* write_2bytes(uint8_t* data, uint16_t value) {
     uint8_t* p = data;
     uint8_t* pp = (uint8_t*)&value;
 
     *p++ = pp[1];
     *p++ = pp[0];
+    return p;
 }
 
 bool bytes_is_equal(const char* p1, const char* p2, size_t len) {

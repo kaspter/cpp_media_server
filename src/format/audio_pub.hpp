@@ -138,30 +138,22 @@ inline size_t make_opus_header(uint8_t* data, int sample_rate, int channel) {
     uint8_t* p = data;
     const char opus_str[] = "OpusHead";
     const size_t opus_str_len = 8;
-    size_t header_len = 0;
 
     memcpy(p, (uint8_t*)opus_str, opus_str_len);
     p += opus_str_len;
 
-    *p = 1;
-    p++;
-    *p = (uint8_t)channel;
-    p++;
-    write_2bytes_le(p, 0);//initial_padding
-    p += 2;
-    write_4bytes_le(p, sample_rate);
-    p += 4;
-    write_2bytes_le(p, 0);
-    p += 2;
-    *p = 0;//mapping_family
-    p++;
+    *p++ = 1;
+    *p++ = (uint8_t)channel;
+    p = write_2bytes_le(p, 0);//initial_padding
+    p = write_4bytes_le(p, sample_rate);
+    p = write_2bytes_le(p, 0);
+    *p++ = 0;//mapping_family
 /*
 { 0x4f, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64,
   0x01, 0x02, 0x38, 0x01, 0x80, 0xbb, 0x00, 0x00,
   0x00, 0x00, 0x00}
 */
-    header_len = (size_t)(p - data);
-    return header_len;
+    return (size_t)(p - data);
 }
 
 #endif //AUDIO_PUB_HPP

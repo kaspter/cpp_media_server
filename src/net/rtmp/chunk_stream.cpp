@@ -404,27 +404,22 @@ int chunk_stream::gen_data(uint8_t* data, int len) {
     if (fmt_ == 0) {
         uint8_t header_data[11];
         uint8_t* p = header_data;
-        write_3bytes(p, timestamp32_);
-        p += 3;
-        write_3bytes(p, msg_len_);
-        p += 3;
-        *p = type_id_;
-        p++;
-        write_4bytes(p, msg_stream_id_);
+        p = write_3bytes(p, timestamp32_);
+        p = write_3bytes(p, msg_len_);
+        *p++ = type_id_;
+        p = write_4bytes(p, msg_stream_id_);
         chunk_all_ptr_->append_data((char*)header_data, sizeof(header_data));
     } else if (fmt_ == 1) {
         uint8_t header_data[7];
         uint8_t* p = header_data;
-        write_3bytes(p, timestamp32_);
-        p += 3;
-        write_3bytes(p, msg_len_);
-        p += 3;
-        *p = type_id_;
+        p = write_3bytes(p, timestamp32_);
+        p = write_3bytes(p, msg_len_);
+        *p++ = type_id_;
         chunk_all_ptr_->append_data((char*)header_data, sizeof(header_data));
     } else if (fmt_ == 2) {
         uint8_t header_data[3];
         uint8_t* p = header_data;
-        write_3bytes(p, timestamp32_);
+        p = write_3bytes(p, timestamp32_);
         chunk_all_ptr_->append_data((char*)header_data, sizeof(header_data));
     } else {
         //need do nothing
