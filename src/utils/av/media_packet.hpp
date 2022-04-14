@@ -26,7 +26,6 @@ public:
 
     std::shared_ptr<MEDIA_PACKET> copy() {
         std::shared_ptr<MEDIA_PACKET> pkt_ptr = std::make_shared<MEDIA_PACKET>(this->buffer_ptr_->data_len() + 1024);
-
         pkt_ptr->copy_properties(*this);
         pkt_ptr->buffer_ptr_->append_data(this->buffer_ptr_->data(), this->buffer_ptr_->data_len());
         return pkt_ptr;
@@ -76,7 +75,7 @@ public:
 
 //rtmp info:
 public:
-    std::string key_;//vhost(option)_appname_streamname
+    std::string key_;//stream_key: vhost(option)_appname_streamname
     std::string vhost_;
     std::string app_;
     std::string streamname_;
@@ -90,7 +89,9 @@ class av_writer_base
 {
 public:
     virtual int write_packet(MEDIA_PACKET_PTR) = 0;
+    // stream key: app/streamname
     virtual std::string get_key() = 0;
+    // this writer's id
     virtual std::string get_writerid() = 0;
     virtual void close_writer() = 0;
     virtual bool is_inited() = 0;

@@ -18,33 +18,31 @@ bool media_stream_manager::get_app_streamname(const std::string& stream_key, std
     }
     app = stream_key.substr(0, pos);
     streamname = stream_key.substr(pos+1);
-
     return true;
 }
 
 int media_stream_manager::add_player(av_writer_base* writer_p) {
     std::string key_str = writer_p->get_key();
     std::string writerid = writer_p->get_writerid();
-
+    MEDIA_STREAM_PTR stream_ptr;
     std::unordered_map<std::string, MEDIA_STREAM_PTR>::iterator iter = media_streams_map_.find(key_str);
-    if (iter == media_stream_manager::media_streams_map_.end()) {
-        MEDIA_STREAM_PTR new_stream_ptr = std::make_shared<media_stream>();
-
-        new_stream_ptr->writer_map_.insert(std::make_pair(writerid, writer_p));
-        media_stream_manager::media_streams_map_.insert(std::make_pair(key_str, new_stream_ptr));
+    if (iter == media_streams_map_.end()) {
+        stream_ptr = std::make_shared<media_stream>();
+        media_streams_map_.insert(std::make_pair(key_str, stream_ptr));
 
         log_infof("add player request:%s(%s) in new writer list", key_str.c_str(), writerid.c_str());
         
         if (play_cb_) {
             play_cb_(key_str);
         }
-        return 1;
+    } 
+    else {
+        stream_ptr = iter->second;
     }
 
-    log_infof("add player request:%s, stream_p:%p",
-        key_str.c_str(), (void*)iter->second.get());
-    iter->second->writer_map_.insert(std::make_pair(writerid, writer_p));
-    return iter->second->writer_map_.size();
+    log_infof("add player request:%s, stream_p:%p", key_str.c_str(), (void*)iter->second.get());
+    stream_ptr->writer_map_.insert(std::make_pair(writerid, writer_p));
+    return stream_ptr->writer_map_.size();
 }
 
 void media_stream_manager::remove_player(av_writer_base* writer_p) {
@@ -68,11 +66,10 @@ void media_stream_manager::remove_player(av_writer_base* writer_p) {
     }
     
     if (map_iter->second->writer_map_.empty() && !map_iter->second->publisher_exist_) {
-        //playlist is empty and the publisher does not exist
+        // playlist is empty and the publisher does not exist
         media_streams_map_.erase(map_iter);
         log_infof("delete stream %s for the publisher and players are empty.", key_str.c_str());
     }
-    return;
 }
 
 MEDIA_STREAM_PTR media_stream_manager::add_publisher(const std::string& stream_key) {
@@ -86,7 +83,7 @@ MEDIA_STREAM_PTR media_stream_manager::add_publisher(const std::string& stream_k
         log_infof("add new publisher stream key:%s, stream_p:%p",
             stream_key.c_str(), (void*)ret_stream_ptr.get());
         media_streams_map_.insert(std::make_pair(stream_key, ret_stream_ptr));
-
+        // @todo move to out and check ret_stream_ptr->publisher_exist_ 
         std::string app;
         std::string streamname;
         if (get_app_streamname(stream_key, app, streamname)) {
@@ -94,11 +91,11 @@ MEDIA_STREAM_PTR media_stream_manager::add_publisher(const std::string& stream_k
                 cb->on_publish(app, streamname);
             }
         }
-
-        return ret_stream_ptr;
     }
-    ret_stream_ptr = iter->second;
-    ret_stream_ptr->publisher_exist_ = true;
+    else {
+        ret_stream_ptr = iter->second;
+        ret_stream_ptr->publisher_exist_ = true;
+    }
     return ret_stream_ptr;
 }
 
@@ -176,14 +173,14 @@ int media_stream_manager::writer_media_packet(MEDIA_PACKET_PTR pkt_ptr) {
         }
     }
 
-    if (media_stream_manager::r2r_writer_) {
+    if (r2r_writer_) {
         MEDIA_PACKET_PTR new_pkt_ptr = pkt_ptr->copy();
-        media_stream_manager::r2r_writer_->write_packet(new_pkt_ptr);
+        r2r_writer_->write_packet(new_pkt_ptr);
     }
 
-    if (media_stream_manager::hls_writer_) {
+    if (hls_writer_) {
         MEDIA_PACKET_PTR new_pkt_ptr = pkt_ptr->copy();
-        media_stream_manager::hls_writer_->write_packet(new_pkt_ptr);
+        hls_writer_->write_packet(new_pkt_ptr);
     }
     
     for (auto write_p : remove_list) {

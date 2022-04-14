@@ -10,7 +10,11 @@
 #define EXTRA_LEN (10*1024)
 
 #define PRE_RESERVE_HEADER_SIZE 200
-
+/**
+buffer_                           start             end_         buffer_size_
+ ----------------------------+----|-----------------|------------------+
+ |< PRE_RESERVE_HEADER_SIZE >|    |<    data_len   >|
+ */
 class data_buffer
 {
 public:
