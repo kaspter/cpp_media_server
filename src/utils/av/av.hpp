@@ -96,10 +96,8 @@ inline void get_video_extradata(unsigned char *pps, int pps_len,
                                 unsigned char *sps, int sps_len, 
                                 unsigned char *extra_data, int& extra_len)
 {
-    unsigned char * body= nullptr;
+    unsigned char * body = extra_data;
     int index = 0;
-    
-    body = extra_data;
 
     body[index++] = 0x01;
     body[index++] = sps[1];
@@ -111,7 +109,7 @@ inline void get_video_extradata(unsigned char *pps, int pps_len,
     body[index++] = 0xe1;
     body[index++] = (sps_len >> 8) & 0xff;
     body[index++] = sps_len & 0xff;
-    memcpy(&body[index],sps,sps_len);
+    memcpy(&body[index], sps, sps_len);
     index +=  sps_len;
     
     /*pps*/

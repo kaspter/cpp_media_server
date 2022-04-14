@@ -1,6 +1,5 @@
 #include "logger.hpp"
 #include "data_buffer.hpp"
-#include <cstring>
 
 data_buffer::data_buffer(size_t data_size) {
     buffer_      = new char[data_size + PRE_RESERVE_HEADER_SIZE];
@@ -8,30 +7,20 @@ data_buffer::data_buffer(size_t data_size) {
     start_       = PRE_RESERVE_HEADER_SIZE;
     end_         = PRE_RESERVE_HEADER_SIZE;
     data_len_    = 0;
-    std::memset(buffer_, 0, data_size);
+    memset(buffer_, 0, data_size);
 }
 
 data_buffer::data_buffer(const data_buffer& input) {
-    sent_flag_     = input.sent_flag_;
-    dst_ip_        = input.dst_ip_;
-    dst_port_      = input.dst_port_;
-
-
-    buffer_        = new char[input.buffer_size_ + PRE_RESERVE_HEADER_SIZE];
-    buffer_size_   = input.buffer_size_;
-    data_len_      = input.data_len_;
-    start_         = input.start_;
-    end_           = input.end_;
-
-    memcpy(buffer_, input.buffer_, data_len_);
+    buffer_ = NULL;
+    this->operator=(input);
 }
 
 data_buffer& data_buffer::operator=(const data_buffer& input) {
     sent_flag_     = input.sent_flag_;
     dst_ip_        = input.dst_ip_;
     dst_port_      = input.dst_port_;
-
-
+    // fixed memroy leak
+    if (buffer_) delete [] buffer_;
     buffer_        = new char[input.buffer_size_ + PRE_RESERVE_HEADER_SIZE];
     buffer_size_   = input.buffer_size_;
     data_len_      = input.data_len_;
@@ -43,14 +32,13 @@ data_buffer& data_buffer::operator=(const data_buffer& input) {
 }
 
 data_buffer::~data_buffer() {
-    if (buffer_)
-    {
+    if (buffer_) {
         delete[] buffer_;
     }
 }
 
 int data_buffer::append_data(const char* input_data, size_t input_len) {
-    if ((input_data == nullptr) || (input_len == 0)) {
+    if (!input_data || !input_len) {
         return 0;
     }
 
@@ -68,15 +56,8 @@ int data_buffer::append_data(const char* input_data, size_t input_len) {
             end_       = start_ + data_len_;
             return data_len_;
         }
-        if (data_len_ >= start_) {
-            char* temp_p = new char[data_len_];
-            memcpy(temp_p, buffer_ + start_, data_len_);
-            memcpy(buffer_ + PRE_RESERVE_HEADER_SIZE, temp_p, data_len_);
-            delete[] temp_p;
-        } else {
-            memcpy(buffer_ + PRE_RESERVE_HEADER_SIZE, buffer_ + start_, data_len_);
-        }
-        
+
+        memmove(buffer_ + PRE_RESERVE_HEADER_SIZE, buffer_ + start_, data_len_);
         memcpy(buffer_ + PRE_RESERVE_HEADER_SIZE + data_len_, input_data, input_len);
         
         data_len_ += input_len;
@@ -124,8 +105,5 @@ size_t data_buffer::data_len() {
 }
 
 bool data_buffer::require(size_t len) {
-    if ((int)len <= data_len_) {
-        return true;
-    }
-    return false;
+    return len <= data_len_;
 }

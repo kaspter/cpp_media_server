@@ -11,7 +11,7 @@
 
 class rtmp_server_session;
 class rtmp_request;
-
+// writer_id -> writer
 typedef std::unordered_map<std::string, av_writer_base*> WRITER_MAP;
 
 typedef void (*PLAY_CALLBACK)(const std::string& key);
