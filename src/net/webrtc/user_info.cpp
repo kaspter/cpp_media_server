@@ -301,10 +301,7 @@ void live_user_info::updata_pps(uint8_t* pps, size_t pps_len) {
 int live_user_info::handle_video_data(MEDIA_PACKET_PTR pkt_ptr) {
     int ret = 0;
 
-    std::string publisher_id = uid_;
-    publisher_id += "_";
-    publisher_id += "video";
-
+    std::string publisher_id = uid_ + "_video";
     if (pkt_ptr->codec_type_ == MEDIA_CODEC_H264) {
         uint8_t sps[1024];
         uint8_t pps[1024];
@@ -413,9 +410,7 @@ int live_user_info::handle_audio_data(MEDIA_PACKET_PTR pkt_ptr) {
         single_pkt->set_timestamp((uint32_t)pkt_ptr->dts_);
         single_pkt->set_marker(1);
 
-        std::string publisher_id = uid_;
-        publisher_id += "_";
-        publisher_id += "audio";
+        std::string publisher_id = uid_ + "_audio";
         room_cb_->on_rtppacket_publisher2room(publisher_id, "audio", single_pkt);
     }
 

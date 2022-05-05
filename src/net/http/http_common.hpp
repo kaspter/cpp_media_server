@@ -66,14 +66,13 @@ public:
     std::unordered_map<std::string, std::string> headers() { return headers_; }
 
     int write(const char* data, size_t len, bool continue_flag = false) {
-        std::stringstream ss;
-
         continue_flag_ = continue_flag;
         if (is_close_ || session_ == nullptr) {
             return -1;
         }
 
         if (!written_header_) {
+            std::stringstream ss;
             ss << proto_ << "/" << version_ << " " << status_code_ << " " << status_ << "\r\n";
             if (!continue_flag) {
                 ss << "Content-Length:" << len  << "\r\n";

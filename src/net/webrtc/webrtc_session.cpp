@@ -60,12 +60,10 @@ void insert_webrtc_session(std::string key, webrtc_session* session) {
 
 webrtc_session* get_webrtc_session(const std::string& key) {
     webrtc_session* session = nullptr;
-    
     auto iter = single_webrtc_map.find(key);
-    if (iter == single_webrtc_map.end()) {
-        return session;
+    if (iter != single_webrtc_map.end()) {
+        session = (webrtc_session*)iter->second;
     }
-    session = (webrtc_session*)iter->second;
     return session;
 }
 
@@ -82,7 +80,6 @@ int32_t remove_webrtc_session(std::string key) {
 int remove_webrtc_session(webrtc_session* session) {
     int count = 0;
     auto iter = single_webrtc_map.begin();
-
     while(iter != single_webrtc_map.end()) {
         webrtc_session* item_session = iter->second;
         if (session == item_session) {
@@ -110,12 +107,9 @@ void single_udp_session_callback::on_write(size_t sent_size, udp_tuple address) 
     //    sent_size, address.to_string().c_str());
 }
 
-void single_udp_session_callback::on_read(const char* data, size_t data_size, udp_tuple address) {
-    webrtc_session* session = nullptr;
-    
+void single_udp_session_callback::on_read(const char* data, size_t data_size, udp_tuple address) {    
     std::string peerid = address.to_string();
-    
-    session = get_webrtc_session(peerid);
+    webrtc_session* session = get_webrtc_session(peerid);
     if (session) {
         session->on_recv_packet((const uint8_t*)data, data_size, address);
         return;
@@ -160,8 +154,9 @@ void single_udp_session_callback::on_read(const char* data, size_t data_size, ud
         return;
     }
     log_warnf("fail to find session to handle packet, data len:%lu, remote address:%s",
-        data_size, address.to_string().c_str());
+        data_size, peerid.c_str());
 }
+
 extern boost::asio::io_context& get_global_io_context();
 
 webrtc_session::webrtc_session(const std::string& roomId, const std::string& uid,

@@ -2183,7 +2183,6 @@ void room_service::rtmp_stream_ingest(MEDIA_PACKET_PTR pkt_ptr) {
             uint32_t video_rtx_ssrc = 0;
             uint32_t audio_ssrc = 0;
 
-
             if (user_ptr->has_video()) {
                 std::string video_msid = make_uuid();
                 video_ssrc = make_live_video_ssrc();
@@ -2198,9 +2197,7 @@ void room_service::rtmp_stream_ingest(MEDIA_PACKET_PTR pkt_ptr) {
                 user_ptr->set_audio_ssrc(audio_ssrc);
                 user_ptr->set_audio_msid(audio_msid);
             }
-            std::string publisher_id = pkt_ptr->app_;
-            publisher_id += "/";
-            publisher_id += pkt_ptr->streamname_;
+            std::string publisher_id = pkt_ptr->app_ + "/" + pkt_ptr->streamname_;
             live_publish(pkt_ptr->streamname_, publisher_id,
                        user_ptr->has_video(), user_ptr->has_audio(),
                        user_ptr->video_ssrc(), user_ptr->audio_ssrc(),
