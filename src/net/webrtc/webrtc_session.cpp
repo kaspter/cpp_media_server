@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <map>
 #include <vector>
+#include <memory>
 #include <assert.h>
 #include <stdio.h>
 #include <openssl/asn1.h>
@@ -61,12 +62,10 @@ void insert_webrtc_session(std::string key, webrtc_session* session) {
 
 webrtc_session* get_webrtc_session(const std::string& key) {
     webrtc_session* session = nullptr;
-    
     auto iter = single_webrtc_map.find(key);
-    if (iter == single_webrtc_map.end()) {
-        return session;
+    if (iter != single_webrtc_map.end()) {
+        session = (webrtc_session*)iter->second;
     }
-    session = (webrtc_session*)iter->second;
     return session;
 }
 
@@ -83,7 +82,6 @@ int32_t remove_webrtc_session(std::string key) {
 int remove_webrtc_session(webrtc_session* session) {
     int count = 0;
     auto iter = single_webrtc_map.begin();
-
     while(iter != single_webrtc_map.end()) {
         webrtc_session* item_session = iter->second;
         if (session == item_session) {
@@ -111,23 +109,19 @@ void single_udp_session_callback::on_write(size_t sent_size, udp_tuple address) 
     //    sent_size, address.to_string().c_str());
 }
 
-void single_udp_session_callback::on_read(const char* data, size_t data_size, udp_tuple address) {
-    webrtc_session* session = nullptr;
-    
+void single_udp_session_callback::on_read(const char* data, size_t data_size, udp_tuple address) {    
     std::string peerid = address.to_string();
-    
-    session = get_webrtc_session(peerid);
+    webrtc_session* session = get_webrtc_session(peerid);
     if (session) {
         session->on_recv_packet((const uint8_t*)data, data_size, address);
         return;
     }
 
     if(stun_packet::is_stun((const uint8_t*)data, data_size)) {
-        stun_packet* packet = nullptr;
         log_infof("receive first stun packet...");
         try
         {
-            packet = stun_packet::parse((const uint8_t*)data, data_size);
+            std::unique_ptr<stun_packet> packet(stun_packet::parse((const uint8_t*)data, data_size));
 
             std::string username = packet->user_name;
             size_t pos = username.find(":");
@@ -137,37 +131,28 @@ void single_udp_session_callback::on_read(const char* data, size_t data_size, ud
             session = get_webrtc_session(username);
             if (!session) {
                 log_errorf("fail to find session by username(%s)", username.c_str());
-                if (packet) {
-                    delete packet;
-                    packet = nullptr;
-                }
                 return;
             }
-            log_infof("insert new session, username:%s, remote address:%s",
-                    username.c_str(), peerid.c_str());
+            log_infof("insert new session, username:%s, remote address:%s", username.c_str(), peerid.c_str());
             insert_webrtc_session(peerid, session);
 
-            session->on_handle_stun_packet(packet, address);
+            session->on_handle_stun_packet(packet.get(), address);
         }
         catch(const std::exception& e) {
             log_errorf("handle stun exception:%s", e.what());
-        }
-
-        if (packet) {
-            delete packet;
-            packet = nullptr;
-        }
-        
+        }        
         return;
     }
+
     log_warnf("fail to find session to handle packet, data len:%lu, remote address:%s",
-        data_size, address.to_string().c_str());
+        data_size, peerid.c_str());
 }
+
 extern uv_loop_t* get_global_io_context();
 
 webrtc_session::webrtc_session(const std::string& roomId, const std::string& uid,
-                room_callback_interface* room, int session_direction, const rtc_media_info& media_info,
-                std::string id):rtc_base_session(roomId, uid, room, session_direction, media_info, id)
+            room_callback_interface* room, int session_direction, const rtc_media_info& media_info, std::string id)
+            : rtc_base_session(roomId, uid, room, session_direction, media_info, id)
             , timer_interface(get_global_io_context(), 500)
             , bitrate_estimate_(this) {
     username_fragment_ = byte_crypto::get_random_string(16);
@@ -433,9 +418,8 @@ void webrtc_session::on_handle_rtp_data(const uint8_t* data, size_t data_len, co
 
     uint32_t abs_time = 0;
     bool ret_abs_time = false;
-    int abstime_id = publisher_ptr->get_abstime_id();
     size_t payload_len = pkt->get_payload_length();
-    pkt->set_abs_time_extension_id((uint8_t)abstime_id);
+    pkt->set_abs_time_extension_id((uint8_t)publisher_ptr->get_abstime_id());
     ret_abs_time = pkt->read_abs_time(abs_time);
     publisher_ptr->on_handle_rtppacket(pkt);
 
@@ -867,6 +851,5 @@ void webrtc_session::set_remote_finger_print(const FINGER_PRINT& fingerprint) {
     dtls_trans_->remote_finger_print.algorithm = string2finger_print_algorithm[fingerprint.type];
 
     log_infof("set remote fingerprint algorithm:%d, value:%s",
-        (int)dtls_trans_->remote_finger_print.algorithm,
-        dtls_trans_->remote_finger_print.value.c_str());
+        (int)dtls_trans_->remote_finger_print.algorithm, fingerprint.hash.c_str());
 }

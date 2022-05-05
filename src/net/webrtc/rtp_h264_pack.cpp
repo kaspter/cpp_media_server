@@ -99,9 +99,7 @@ std::vector<rtp_packet*> generate_fuA_packets(uint8_t* nalu, size_t nalu_size, h
 
 rtp_packet* generate_singlenalu_packets(uint8_t* data, size_t len, header_extension* ext) {
     rtp_packet* packet = make_rtp_packet(ext, len);
-
     uint8_t* payload = packet->get_payload();
-
     memcpy(payload, data, len);
     packet->set_payload_length(len);
     return packet;

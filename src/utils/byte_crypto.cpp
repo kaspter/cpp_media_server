@@ -6,7 +6,6 @@
 #include <random>
 #include <cstring>
 
-uint8_t byte_crypto::hmac_sha1_buffer[20];
 HMAC_CTX* byte_crypto::hmac_sha1_ctx = nullptr;
 const uint32_t byte_crypto::crc32_table[] =
 {
@@ -49,36 +48,29 @@ std::default_random_engine byte_crypto::random;
 void byte_crypto::init() {
     byte_crypto::hmac_sha1_ctx = HMAC_CTX_new();
 
-    std::memset(hmac_sha1_buffer, 0, sizeof(hmac_sha1_buffer));
-
     std::chrono::system_clock::duration d = std::chrono::system_clock::now().time_since_epoch();
-
     std::chrono::milliseconds mil = std::chrono::duration_cast<std::chrono::milliseconds>(d);
-
     random = std::default_random_engine((uint32_t)(mil.count() & 0xffffffff));
 }
 
 void byte_crypto::deinit() {
-    if (byte_crypto::hmac_sha1_ctx) {
-        HMAC_CTX_free(byte_crypto::hmac_sha1_ctx);
-        byte_crypto::hmac_sha1_ctx = nullptr;
+    if (hmac_sha1_ctx) {
+        HMAC_CTX_free(hmac_sha1_ctx);
+        hmac_sha1_ctx = nullptr;
     }
 }
 
 uint32_t byte_crypto::get_random_uint(uint32_t min, uint32_t max) {
     std::uniform_int_distribution<uint32_t> dest(min, max);
-
     return dest(random);
 }
 
 uint32_t byte_crypto::get_crc32(const uint8_t* data, size_t size) {
     uint32_t crc{ 0xFFFFFFFF };
     const uint8_t* p = data;
-
     while (size--) {
         crc = byte_crypto::crc32_table[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
     }
-
     return crc ^ ~0U;
 }
 
@@ -97,8 +89,8 @@ uint8_t* byte_crypto::get_hmac_sha1(const std::string& key, const uint8_t* data,
 
 
     uint32_t ret_len = 0;
-
-    ret = HMAC_Final(byte_crypto::hmac_sha1_ctx, (uint8_t*)byte_crypto::hmac_sha1_buffer, &ret_len);
+    static uint8_t hmac_sha1_buffer[20];
+    ret = HMAC_Final(byte_crypto::hmac_sha1_ctx, hmac_sha1_buffer, &ret_len);
     if (ret != 1) {
         MS_THROW_ERROR("OpenSSL HMAC_Final() failed with key '%s' and data length %zu bytes",
             key.c_str(), len);
@@ -107,7 +99,7 @@ uint8_t* byte_crypto::get_hmac_sha1(const std::string& key, const uint8_t* data,
         MS_THROW_ERROR("OpenSSL HMAC_Final() resultLen is %u instead of 20", ret_len);
     }
 
-    return byte_crypto::hmac_sha1_buffer;
+    return hmac_sha1_buffer;
 }
 
 std::string byte_crypto::get_random_string(size_t len) {
@@ -116,11 +108,10 @@ std::string byte_crypto::get_random_string(size_t len) {
     static const char chars[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
                                 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                                 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-    std::default_random_engine random;
-
     if (len > MAX_LEN) {
         len = MAX_LEN;
     }
+
     for (size_t i{ 0 }; i < len; ++i)
     {
         uint32_t rand_number = get_random_uint(0, sizeof(chars)-1);

@@ -8,15 +8,6 @@
 #include "net/udp/udp_server.hpp"
 #include "utils/timeex.hpp"
 #include "modules/remote_bitrate_estimator/remote_bitrate_estimator_abs_send_time.h"
-
-#include <openssl/asn1.h>
-#include <openssl/bn.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/ssl.h>
-#include <openssl/bio.h>
-#include <openssl/x509.h>
 #include <map>
 
 class webrtc_session;

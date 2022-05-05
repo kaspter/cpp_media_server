@@ -21,8 +21,8 @@ typedef std::unordered_map<std::string, std::shared_ptr<rtc_subscriber>> SUBSCRI
 class webrtc_stream_manager_callback : public stream_manager_callbackI
 {
 public:
-    webrtc_stream_manager_callback();
-    virtual ~webrtc_stream_manager_callback();
+    webrtc_stream_manager_callback(){}
+    virtual ~webrtc_stream_manager_callback(){}
 
 public:
     virtual void on_publish(const std::string& app, const std::string& streamname) override;

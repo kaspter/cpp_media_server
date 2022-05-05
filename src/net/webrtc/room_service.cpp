@@ -303,14 +303,6 @@ int get_publisher_statics(const std::string& roomId, const std::string& uid, jso
     return 0;
 }
 
-webrtc_stream_manager_callback::webrtc_stream_manager_callback() {
-
-}
-
-webrtc_stream_manager_callback::~webrtc_stream_manager_callback() {
-
-}
-
 void webrtc_stream_manager_callback::on_publish(const std::string& app, const std::string& streamname) {
     log_infof("webrtc on publish app:%s, streamname:%s", app.c_str(), streamname.c_str());
 }
@@ -326,10 +318,9 @@ void webrtc_stream_manager_callback::on_unpublish(const std::string& app, const 
     room_ptr->remove_live_user(app, streamname);
 }
 
-static webrtc_stream_manager_callback s_webrtc_callback;
-
 void init_webrtc_stream_manager_callback() {
-    media_stream_manager::add_stream_callback(&s_webrtc_callback);
+    static webrtc_stream_manager_callback s_webrtc_callback;
+    media_stream_manager::Instance()->add_stream_callback(&s_webrtc_callback);
 }
 
 room_service::room_service(const std::string& roomId):timer_interface(uv_default_loop(), 2000)
@@ -2175,28 +2166,18 @@ void room_service::rtmp_stream_ingest(MEDIA_PACKET_PTR pkt_ptr) {
             user_ptr->set_media_ready(true);
 
             //start publish stream
-            uint32_t video_ssrc = 0;
-            uint32_t video_rtx_ssrc = 0;
-            uint32_t audio_ssrc = 0;
-
-
             if (user_ptr->has_video()) {
                 std::string video_msid = make_uuid();
-                video_ssrc = make_live_video_ssrc();
-                video_rtx_ssrc = make_live_video_ssrc();
-                user_ptr->set_video_ssrc(video_ssrc);
-                user_ptr->set_video_rtx_ssrc(video_rtx_ssrc);
+                user_ptr->set_video_ssrc(make_live_video_ssrc());
+                user_ptr->set_video_rtx_ssrc(make_live_video_ssrc());
                 user_ptr->set_video_msid(video_msid);
             }
             if (user_ptr->has_audio()) {
                 std::string audio_msid = make_uuid();
-                audio_ssrc = make_live_audio_ssrc();
-                user_ptr->set_audio_ssrc(audio_ssrc);
+                user_ptr->set_audio_ssrc(make_live_audio_ssrc());
                 user_ptr->set_audio_msid(audio_msid);
             }
-            std::string publisher_id = pkt_ptr->app_;
-            publisher_id += "/";
-            publisher_id += pkt_ptr->streamname_;
+            std::string publisher_id = pkt_ptr->app_ + "/" + pkt_ptr->streamname_;
             live_publish(pkt_ptr->streamname_, publisher_id,
                        user_ptr->has_video(), user_ptr->has_audio(),
                        user_ptr->video_ssrc(), user_ptr->audio_ssrc(),

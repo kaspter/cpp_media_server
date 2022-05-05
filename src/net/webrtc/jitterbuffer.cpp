@@ -68,8 +68,7 @@ void jitterbuffer::input_rtp_packet(const std::string& roomId, const std::string
 
         //check the packet in map
         for (auto iter = rtp_packets_map_.begin();
-            iter != rtp_packets_map_.end();
-            ) {
+            iter != rtp_packets_map_.end();) {
             int64_t pkt_extend_seq = iter->first;
             if ((output_seq_ + 1) == pkt_extend_seq) {
                 if (iter->second->media_type_ == "video") {
@@ -178,21 +177,21 @@ bool jitterbuffer::update_seq(rtp_packet* input_pkt, int64_t& extend_seq, bool& 
         }
         max_seq_ = seq;
     } else if (udelta <= RTP_SEQ_MOD - MAX_MISORDER) {
-            /* the sequence number made a very large jump */
-            if (seq == bad_seq_) {
-                /*
-                 * Two sequential packets -- assume that the other side
-                 * restarted without telling us so just re-sync
-                 * (i.e., pretend this was the first packet).
-                 */
-                init_seq(input_pkt);
-                reset = true;
-                extend_seq = cycles_ + seq;
-                return true;
-            } else {
-                bad_seq_= (seq + 1) & (RTP_SEQ_MOD-1);
-                return false;
-            }
+        /* the sequence number made a very large jump */
+        if (seq == bad_seq_) {
+            /*
+             * Two sequential packets -- assume that the other side
+             * restarted without telling us so just re-sync
+             * (i.e., pretend this was the first packet).
+             */
+            init_seq(input_pkt);
+            reset = true;
+            extend_seq = cycles_ + seq;
+            return true;
+        } else {
+            bad_seq_= (seq + 1) & (RTP_SEQ_MOD-1);
+            return false;
+        }
     } else {
         /* duplicate or reordered packet */
     }

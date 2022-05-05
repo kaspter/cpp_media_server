@@ -36,16 +36,15 @@ class udp_tuple
 public:
     udp_tuple() {
     }
-    udp_tuple(const std::string& ip, uint16_t udp_port): ip_address(ip)
-        , port(udp_port)
-    {
+    
+    udp_tuple(const std::string& ip, uint16_t udp_port): ip_address(ip), port(udp_port) {
     }
+
     ~udp_tuple(){
     }
 
     std::string to_string() const {
         std::string ret = ip_address;
-
         ret += ":";
         ret += std::to_string(port);
         return ret;
@@ -76,8 +75,8 @@ friend void udp_read_callback(uv_udp_t* handle,
 friend void udp_send_callback(uv_udp_send_t* req, int status);
 
 public:
-    udp_server(uv_loop_t* loop, uint16_t port, udp_session_callbackI* cb):cb_(cb)
-                                                                        , loop_(loop)
+    udp_server(uv_loop_t* loop, uint16_t port, udp_session_callbackI* cb)
+        : cb_(cb), loop_(loop)
     {
         recv_buffer_ = new char[UDP_DATA_BUFFER_MAX];
 
@@ -121,9 +120,7 @@ public:
 
 private:
     void try_read() {
-        int ret = 0;
-
-        ret = uv_udp_recv_start(&udp_handle_, udp_alloc_callback, udp_read_callback);
+        int ret = uv_udp_recv_start(&udp_handle_, udp_alloc_callback, udp_read_callback);
         if (ret != 0) {
             if (ret == UV_EALREADY) {
                 return;
@@ -163,10 +160,10 @@ private:
             }
             udp_req_info_t* wr = (udp_req_info_t*)req;
             if (wr) {
-                free(wr);
                 if (wr->buf.base) {
                     free(wr->buf.base);
                 }
+                free(wr);
             }
             return;
         }

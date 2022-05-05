@@ -245,17 +245,14 @@ void rtc_dtls::on_ssl_info(int type, int value) {
     }
     else if ((type & SSL_CB_ALERT) != 0) {
         std::string alert_type;
-
         switch (*SSL_alert_type_string(value))
         {
             case 'W':
                 alert_type = "warning";
                 break;
-
             case 'F':
                 alert_type = "fatal";
                 break;
-
             default:
                 alert_type = "undefined";
         }

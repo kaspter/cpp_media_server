@@ -6,11 +6,9 @@
 
 
 rtmp2rtc_writer::rtmp2rtc_writer() {
-
 }
 
 rtmp2rtc_writer::~rtmp2rtc_writer() {
-
 }
 
 int rtmp2rtc_writer::write_packet(MEDIA_PACKET_PTR pkt_ptr) {

@@ -21,10 +21,9 @@ public:
     static uint8_t* get_hmac_sha1(const std::string& key, const uint8_t* data, size_t len);
     static std::string get_random_string(size_t len);
 
-public:
+private:
     static std::default_random_engine random;
     static HMAC_CTX* hmac_sha1_ctx;
-    static uint8_t hmac_sha1_buffer[20];
     static const uint32_t crc32_table[256];
 };
 

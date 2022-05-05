@@ -208,9 +208,7 @@ void rtc_publisher::on_handle_rtppacket(rtp_packet* pkt) {
     }
     
     if ( Config::rtmp_is_enable() && Config::rtc2rtmp_is_enable()
-        && ( ((media_type_ == MEDIA_VIDEO_TYPE) 
-        && (codec_type_ == MEDIA_CODEC_H264))
-        || (media_type_ == MEDIA_AUDIO_TYPE)) ) {
+        && ( ((media_type_ == MEDIA_VIDEO_TYPE)  && (codec_type_ == MEDIA_CODEC_H264)) || (media_type_ == MEDIA_AUDIO_TYPE)) ) {
         jb_handler_.input_rtp_packet(roomId_, uid_, media_type_str_, stream_type_, clock_rate_, pkt);
     }
     
