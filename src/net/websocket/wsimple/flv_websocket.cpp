@@ -33,7 +33,7 @@ void av_outputer::release() {
 
 int av_outputer::output_packet(MEDIA_PACKET_PTR pkt_ptr) {
     int ret = 0;
-
+    auto stm_mgr = media_stream_manager::Instance();
     if ((pkt_ptr->av_type_ == MEDIA_AUDIO_TYPE) && (pkt_ptr->codec_type_ == MEDIA_CODEC_OPUS)) {
 #ifdef ENABLE_FFMPEG
         if (trans_ == nullptr) {
@@ -59,7 +59,7 @@ int av_outputer::output_packet(MEDIA_PACKET_PTR pkt_ptr) {
                         "audio seq data");
             }           
             ret_pkt_ptr->streamname_ = pkt_ptr->streamname_;
-            ret = media_stream_manager::writer_media_packet(ret_pkt_ptr);
+            ret = stm_mgr->writer_media_packet(ret_pkt_ptr);
         }
 #endif
     } else {
@@ -68,7 +68,7 @@ int av_outputer::output_packet(MEDIA_PACKET_PTR pkt_ptr) {
             return ret;
         }
         pkt_ptr->fmt_type_ = MEDIA_FORMAT_FLV;
-        ret = media_stream_manager::writer_media_packet(pkt_ptr);
+        ret = stm_mgr->writer_media_packet(pkt_ptr);
     }
 
     return ret;
@@ -108,7 +108,7 @@ void flv_websocket::on_read(websocket_session* session, const char* data, size_t
         log_infof("websocket uri:%s, path:%s", uri.c_str(), session->path().c_str());
 
         session->set_uri(uri);
-        media_stream_manager::add_publisher(uri);
+        media_stream_manager::Instance()->add_publisher(uri);
     }
     
     if (session->outputer_ == nullptr) {
@@ -129,7 +129,7 @@ void flv_websocket::on_read(websocket_session* session, const char* data, size_t
 void flv_websocket::on_close(websocket_session* session) {
     log_errorf("flv in websocket is closed, uri:%s", session->get_uri().c_str());
     if (!session->get_uri().empty()) {
-        media_stream_manager::remove_publisher(session->get_uri());
+        media_stream_manager::Instance()->remove_publisher(session->get_uri());
     }
     outputer_.release();
 }

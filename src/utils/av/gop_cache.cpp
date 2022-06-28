@@ -69,8 +69,7 @@ int gop_cache::writer_gop(av_writer_base* writer_p) {
         }
     }
 
-    for (auto iter : packet_list) {
-        MEDIA_PACKET_PTR pkt_ptr = iter;
+    for (auto pkt_ptr : packet_list) {
         ret = writer_p->write_packet(pkt_ptr);
         if (ret < 0) {
             return ret;

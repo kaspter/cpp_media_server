@@ -47,17 +47,18 @@ void rtmp_server_session::close() {
         return;
     }
     closed_flag_ = true;
+    auto mgr = media_stream_manager::Instance();
     log_infof("rtmp session close, request isReady:%s, action:%s",
             req_.is_ready_ ? "true" : "false",
             req_.publish_flag_ ? "publish" : "play");
     if (req_.is_ready_ && !req_.publish_flag_) {
         if (play_writer_) {
-            media_stream_manager::remove_player(play_writer_);
+            mgr->remove_player(play_writer_);
             delete play_writer_;
         }
     } else {
         if (!req_.key_.empty()) {
-            media_stream_manager::remove_publisher(req_.key_);
+            mgr->remove_publisher(req_.key_);
         }
     }
 
@@ -98,7 +99,7 @@ int rtmp_server_session::send_rtmp_ack(uint32_t size) {
 int rtmp_server_session::receive_chunk_stream() {
     CHUNK_STREAM_PTR cs_ptr;
     int ret = -1;
-
+    auto stm_mgr = media_stream_manager::Instance();
     while(true) {
         //receive fmt+csid | basic header | message header | data
         ret = read_chunk_stream(cs_ptr);
@@ -148,7 +149,7 @@ int rtmp_server_session::receive_chunk_stream() {
             if (req_.is_ready_ && !req_.publish_flag_) {
                 //rtmp play is ready.
                 play_writer_ = new rtmp_writer(this);
-                media_stream_manager::add_player(play_writer_);
+                stm_mgr->add_player(play_writer_);
             }
             if (recv_buffer_.data_len() > 0) {
                 continue;
@@ -169,7 +170,7 @@ int rtmp_server_session::receive_chunk_stream() {
 
             keep_alive();
             //handle video/audio
-            media_stream_manager::writer_media_packet(pkt_ptr);
+            stm_mgr->writer_media_packet(pkt_ptr);
 
             cs_ptr->reset();
             if (recv_buffer_.data_len() > 0) {

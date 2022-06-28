@@ -29,7 +29,7 @@ void httpflv_handle(const http_request* request, std::shared_ptr<http_response> 
 
     s_httpflv_handle_map.insert(std::make_pair(uuid, writer_p));
 
-    media_stream_manager::add_player(writer_p);
+    media_stream_manager::Instance()->add_player(writer_p);
 
     return;
 }
@@ -85,7 +85,7 @@ void httpflv_server::on_check_alive() {
         bool is_alive = writer_p->is_alive();
         if (!is_alive) {
             s_httpflv_handle_map.erase(iter++);
-            media_stream_manager::remove_player(writer_p);
+            media_stream_manager::Instance()->remove_player(writer_p);
             delete writer_p;
             continue;
         }

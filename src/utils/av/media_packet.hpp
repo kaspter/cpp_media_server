@@ -64,8 +64,11 @@ public:
     }
 
 public:
+    // 媒体类型：音频/视频
     MEDIA_PKT_TYPE av_type_      = MEDIA_UNKOWN_TYPE;
+    // 编码类型：opus,aac,vp8,vp9
     MEDIA_CODEC_TYPE codec_type_ = MEDIA_CODEC_UNKOWN;
+    // 封装格式：ts,flv, raw
     MEDIA_FORMAT_TYPE fmt_type_  = MEDIA_FORMAT_UNKOWN;
     int64_t dts_ = 0;
     int64_t pts_ = 0;
@@ -75,7 +78,7 @@ public:
 
 //rtmp info:
 public:
-    std::string key_;//stream_key: vhost(option)_appname_streamname
+    std::string key_;//stream_key: vhost(option)_app_streamname
     std::string vhost_;
     std::string app_;
     std::string streamname_;
@@ -93,7 +96,9 @@ public:
     virtual std::string get_key() = 0;
     // this writer's id
     virtual std::string get_writerid() = 0;
+    
     virtual void close_writer() = 0;
+
     virtual bool is_inited() = 0;
     virtual void set_init_flag(bool flag) = 0;
 };

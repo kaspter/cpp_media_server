@@ -1,70 +1,56 @@
 #ifndef MEDIA_SERVER_H
 #define MEDIA_SERVER_H
-#include "rtmp_server.hpp"
-#include "ws_server.hpp"
-#include "httpflv_server.hpp"
-#include "net/webrtc/webrtc_pub.hpp"
-#include "net/webrtc/rtc_dtls.hpp"
-#include "net/webrtc/srtp_session.hpp"
-#include "net/webrtc/rtmp2rtc.hpp"
-#include "net/hls/hls_writer.hpp"
-#include "net/httpapi/httpapi_server.hpp"
-#include "net/rtmp/rtmp_relay_mgr.hpp"
-#include "utils/byte_crypto.hpp"
-#include "utils/config.hpp"
-#include "utils/av/media_stream_manager.hpp"
-#include "logger.hpp"
-#include <stdint.h>
-#include <stddef.h>
-#include <iostream>
+
 #include <uv.h>
 
 class flv_websocket;
 class protoo_server;
+class websocket_server;
+class rtmp2rtc_writer;
+class rtmp_server;
+class httpflv_server;
+class httpapi_server;
+class hls_writer;
+class rtmp_relay_manager;
 
 class MediaServer
 {
 public:
-    friend void on_play_callback(const std::string& key);
-
-public:
-    static void Run(const std::string& cfg_file);
+    void Run(const std::string& cfg_file);
     static uv_loop_t* get_loop() { return MediaServer::loop_; }
 
 private:
-    static void create_webrtc();
-    static void create_rtmp();
-    static void create_httpflv();
-    static void create_hls();
-    static void create_websocket_flv();
-    static void create_httpapi();
+    void create_webrtc();
+    void create_rtmp();
+    void create_httpflv();
+    void create_hls();
+    void create_websocket_flv();
+    void create_httpapi();
 
-    static void release_all();
+    void release_all();
 
 private:
     static uv_loop_t* loop_;
     static uv_loop_t* hls_loop_;
 
 private:
-    static websocket_server* ws_p;
-    static rtmp2rtc_writer* r2r_output;
+    websocket_server* ws_p = nullptr;
+    rtmp2rtc_writer* r2r_output  = nullptr;
+    hls_writer* hls_output  = nullptr;
 
 private:
-    static std::shared_ptr<rtmp_server> rtmp_ptr;
+    std::shared_ptr<rtmp_server> rtmp_ptr;
 
 private:
-    static std::shared_ptr<httpflv_server> httpflv_ptr;
+    std::shared_ptr<httpflv_server> httpflv_ptr;
 
 private:
-    static std::shared_ptr<httpapi_server> httpapi_ptr;
+    std::shared_ptr<httpapi_server> httpapi_ptr;
 
 private:
-    static hls_writer* hls_output;
-
-private:
-    static flv_websocket* ws_flv_server;
-    static protoo_server* ws_webrtc_server;
-    static rtmp_relay_manager* relay_mgr_p;
+    flv_websocket* ws_flv_server  = nullptr;
+    protoo_server* ws_webrtc_server = nullptr;
+    rtmp_relay_manager* relay_mgr_p = nullptr;
 };
 
 #endif

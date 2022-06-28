@@ -1,5 +1,6 @@
 #ifndef RTMP_MEDIA_STREAM_HPP
 #define RTMP_MEDIA_STREAM_HPP
+
 #include "media_packet.hpp"
 #include "gop_cache.hpp"
 #include <stdint.h>
@@ -11,11 +12,11 @@
 
 class rtmp_server_session;
 class rtmp_request;
+
+typedef void (*PLAY_CALLBACK)(const std::string& key, void* data);
+
 // writer_id -> writer
 typedef std::unordered_map<std::string, av_writer_base*> WRITER_MAP;
-
-typedef void (*PLAY_CALLBACK)(const std::string& key);
-
 class media_stream
 {
 public:
@@ -37,39 +38,38 @@ public:
 class media_stream_manager
 {
 public:
-    static int add_player(av_writer_base* writer_p);
-    static void remove_player(av_writer_base* writer_p);
+    static media_stream_manager* Instance();
+    int add_player(av_writer_base* writer_p);
+    void remove_player(av_writer_base* writer_p);
 
-    static MEDIA_STREAM_PTR add_publisher(const std::string& stream_key);
-    static void remove_publisher(const std::string& stream_key);
+    MEDIA_STREAM_PTR add_publisher(const std::string& stream_key);
+    void remove_publisher(const std::string& stream_key);
 
-    static void set_hls_writer(av_writer_base* writer);
-    static void set_rtc_writer(av_writer_base* writer);
+    void set_hls_writer(av_writer_base* writer);
+    void set_rtc_writer(av_writer_base* writer);
 
-    static void set_play_callback(PLAY_CALLBACK cb);
-    static PLAY_CALLBACK get_play_callback();
+    void set_play_callback(PLAY_CALLBACK cb, void* data);
+    PLAY_CALLBACK get_play_callback();
+    
+public:
+    int writer_media_packet(MEDIA_PACKET_PTR pkt_ptr);
 
 public:
-    static int writer_media_packet(MEDIA_PACKET_PTR pkt_ptr);
-
-public:
-    static void add_stream_callback(stream_manager_callbackI* cb) {
+    void add_stream_callback(stream_manager_callbackI* cb) {
         cb_vec_.push_back(cb);
     }
 
 private:
-    static bool get_app_streamname(const std::string& stream_key, std::string& app, std::string& streamname);
+    std::unordered_map<std::string, MEDIA_STREAM_PTR> media_streams_map_;//key("app/stream"), MEDIA_STREAM_PTR
+    std::vector<stream_manager_callbackI*> cb_vec_;
 
 private:
-    static std::unordered_map<std::string, MEDIA_STREAM_PTR> media_streams_map_;//key("app/stream"), MEDIA_STREAM_PTR
-    static std::vector<stream_manager_callbackI*> cb_vec_;
+    av_writer_base* hls_writer_ = nullptr;
+    av_writer_base* r2r_writer_ = nullptr;//rtmp to webrtc
 
 private:
-    static av_writer_base* hls_writer_;
-    static av_writer_base* r2r_writer_;//rtmp to webrtc
-
-private:
-    static PLAY_CALLBACK play_cb_;
+    PLAY_CALLBACK play_cb_ = nullptr;
+    void* play_data_ = nullptr;
 };
 
 #endif //RTMP_MEDIA_STREAM_HPP

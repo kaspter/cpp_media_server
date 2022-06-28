@@ -14,7 +14,7 @@ rtmp_relay::rtmp_relay(const std::string& host, const std::string& key, uv_loop_
 rtmp_relay::~rtmp_relay() {
     log_infof("rtmp relay destruct host:%s, key:%s", host_.c_str(), key_.c_str());
     client_ptr_ = nullptr;
-    media_stream_manager::remove_publisher(key_);
+    media_stream_manager::Instance()->remove_publisher(key_);
 }
 
 void rtmp_relay::on_message(int ret_code, MEDIA_PACKET_PTR pkt_ptr) {
@@ -32,7 +32,7 @@ void rtmp_relay::on_message(int ret_code, MEDIA_PACKET_PTR pkt_ptr) {
         return;
     }
 
-    int ret = media_stream_manager::writer_media_packet(pkt_ptr);
+    int ret = media_stream_manager::Instance()->writer_media_packet(pkt_ptr);
     if (ret > 0) {
         alive_cnt_ = 0;
     }

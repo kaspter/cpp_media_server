@@ -210,6 +210,7 @@ void user_info::on_rtmp_camera_callback(MEDIA_PACKET_PTR pkt_ptr) {
                 pkt_ptr->av_type_, roomId_.c_str(), uid_.c_str());
         return;
     }
+    auto stm_mgr = media_stream_manager::Instance();
     if (pkt_ptr->av_type_ == MEDIA_AUDIO_TYPE) {
 #ifdef ENABLE_FFMPEG
         if (!trans_) {
@@ -238,7 +239,7 @@ void user_info::on_rtmp_camera_callback(MEDIA_PACKET_PTR pkt_ptr) {
             ret_pkt_ptr->streamname_ = pkt_ptr->streamname_;
             //log_infof("media type:%s, origin dts:%ld, dts:%ld", 
             //        avtype_tostring(ret_pkt_ptr->av_type_).c_str(), org_dts, ret_pkt_ptr->dts_);
-            media_stream_manager::writer_media_packet(ret_pkt_ptr);
+            stm_mgr->writer_media_packet(ret_pkt_ptr);
             //send_buffer(ret_pkt_ptr);
         }
 #endif
@@ -251,16 +252,16 @@ void user_info::on_rtmp_camera_callback(MEDIA_PACKET_PTR pkt_ptr) {
 
     //log_infof("media type:%s, origin dts:%ld, dts:%ld", 
     //        avtype_tostring(pkt_ptr->av_type_).c_str(), org_dts, pkt_ptr->dts_);
-    media_stream_manager::writer_media_packet(pkt_ptr);
+    stm_mgr->writer_media_packet(pkt_ptr);
     //send_buffer(pkt_ptr);
 }
 
 void user_info::send_buffer(MEDIA_PACKET_PTR pkt_ptr) {
     send_buffer_.insert(std::make_pair(pkt_ptr->dts_, pkt_ptr));
-
+    auto stm_mgr = media_stream_manager::Instance();
     while(send_buffer_.size() > 10) {
         auto iter = send_buffer_.begin();
-        media_stream_manager::writer_media_packet(iter->second);
+        stm_mgr->writer_media_packet(iter->second);
         iter = send_buffer_.erase(iter);
     }
 }

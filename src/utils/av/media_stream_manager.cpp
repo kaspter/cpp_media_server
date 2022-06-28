@@ -4,14 +4,12 @@
 #include <sstream>
 #include <vector>
 
-std::unordered_map<std::string, MEDIA_STREAM_PTR> media_stream_manager::media_streams_map_;
-std::vector<stream_manager_callbackI*> media_stream_manager::cb_vec_;
-av_writer_base* media_stream_manager::hls_writer_ = nullptr;
-av_writer_base* media_stream_manager::r2r_writer_ = nullptr;
+media_stream_manager* media_stream_manager::Instance(){
+    static media_stream_manager stm_mgr;
+    return &stm_mgr;
+}
 
-PLAY_CALLBACK media_stream_manager::play_cb_ = nullptr;
-
-bool media_stream_manager::get_app_streamname(const std::string& stream_key, std::string& app, std::string& streamname) {
+bool get_app_streamname(const std::string& stream_key, std::string& app, std::string& streamname) {
     size_t pos = stream_key.find("/");
     if (pos == stream_key.npos) {
         return false;
@@ -27,20 +25,21 @@ int media_stream_manager::add_player(av_writer_base* writer_p) {
     MEDIA_STREAM_PTR stream_ptr;
     std::unordered_map<std::string, MEDIA_STREAM_PTR>::iterator iter = media_streams_map_.find(key_str);
     if (iter == media_streams_map_.end()) {
+        // 没有则创建流
         stream_ptr = std::make_shared<media_stream>();
         media_streams_map_.insert(std::make_pair(key_str, stream_ptr));
 
         log_infof("add player request:%s(%s) in new writer list", key_str.c_str(), writerid.c_str());
         
         if (play_cb_) {
-            play_cb_(key_str);
+            play_cb_(key_str, play_data_);
         }
     } 
     else {
         stream_ptr = iter->second;
     }
 
-    log_infof("add player request:%s, stream_p:%p", key_str.c_str(), (void*)iter->second.get());
+    log_infof("add player request:%s, stream_p:%p, id:%s", key_str.c_str(), (void*)iter->second.get(), writerid.c_str());
     stream_ptr->writer_map_.insert(std::make_pair(writerid, writer_p));
     return stream_ptr->writer_map_.size();
 }
@@ -55,17 +54,17 @@ void media_stream_manager::remove_player(av_writer_base* writer_p) {
         log_warnf("it's empty when remove player:%s", key_str.c_str());
         return;
     }
-
-    auto writer_iter = map_iter->second->writer_map_.find(writerid);
-    if (writer_iter != map_iter->second->writer_map_.end()) {
+    MEDIA_STREAM_PTR stream_ptr = map_iter->second;
+    auto writer_iter = stream_ptr->writer_map_.find(writerid);
+    if (writer_iter != stream_ptr->writer_map_.end()) {
         log_infof("remove player key:%s, erase writeid:%s", key_str.c_str(), writerid.c_str());
-        map_iter->second->writer_map_.erase(writer_iter);
+        stream_ptr->writer_map_.erase(writer_iter);
     } else {
         log_infof("remove player key:%s, fail to find writeid:%s, writer map size:%lu",
-                key_str.c_str(), writerid.c_str(), map_iter->second->writer_map_.size());
+                key_str.c_str(), writerid.c_str(), stream_ptr->writer_map_.size());
     }
     
-    if (map_iter->second->writer_map_.empty() && !map_iter->second->publisher_exist_) {
+    if (stream_ptr->writer_map_.empty() && !stream_ptr->publisher_exist_) {
         // playlist is empty and the publisher does not exist
         media_streams_map_.erase(map_iter);
         log_infof("delete stream %s for the publisher and players are empty.", key_str.c_str());
@@ -135,22 +134,22 @@ PLAY_CALLBACK media_stream_manager::get_play_callback() {
     return play_cb_;
 }
 
-void media_stream_manager::set_play_callback(PLAY_CALLBACK cb) {
+void media_stream_manager::set_play_callback(PLAY_CALLBACK cb, void* data) {
     play_cb_ = cb;
+    play_data_ = data;
 }
 
 int media_stream_manager::writer_media_packet(MEDIA_PACKET_PTR pkt_ptr) {
     MEDIA_STREAM_PTR stream_ptr = add_publisher(pkt_ptr->key_);
-    int player_cnt = 0;
-
     if (!stream_ptr) {
         log_errorf("fail to get stream key:%s", pkt_ptr->key_.c_str());
         return -1;
     }
-
+    // update gop
     stream_ptr->cache_.insert_packet(pkt_ptr);
-    std::vector<av_writer_base*> remove_list;
 
+    int player_cnt = 0;
+    std::vector<av_writer_base*> remove_list;
     for (auto item : stream_ptr->writer_map_) {
         auto writer = item.second;
         if (!writer->is_inited()) {
