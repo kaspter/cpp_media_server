@@ -10,6 +10,28 @@ set(INSTALL_RPATH "${PREFIX_DIR}/lib")
 option(ENABLE_FFMPEG "Enable FFmpeg" true)
 # set output static libary
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/output/lib)
+function(set_file_group prefix)
+    message(STATUS "set_file_group " ${prefix} " " ${ARGC})
+    foreach(FILE IN LISTS ARGN 1)
+       # Get the directory of the source file
+       get_filename_component(PARENT_DIR "${FILE}" DIRECTORY)
+
+       # Remove common directory prefix to make the group
+       string(REPLACE "${prefix}" "" GROUP "${PARENT_DIR}")
+
+      # Make sure we are using windows slashes
+       string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+       # Group into "Source Files" and "Header Files"
+       #if ("${FILE}" MATCHES ".*\\.cpp")
+       #   set(GROUP "Source Files${GROUP}")
+       #elseif("${FILE}" MATCHES ".*\\.h")
+       #   set(GROUP "Header Files${GROUP}")
+       #endif()
+       #message(STATUS ${GROUP} " : " ${FILE})
+       source_group("${GROUP}" FILES "${FILE}")
+    endforeach()
+endfunction()
 
 # set include path
 include_directories(src
@@ -359,6 +381,7 @@ IF(ENABLE_FFMPEG)
     aux_source_directory(src/transcode SRC_LIST)
 ENDIF()
 
+set_file_group(src ${SRC_LIST})
 add_executable(cpp_media_server ${SRC_LIST})
 
 add_dependencies(cpp_media_server sdptransform srtp2) #openssl libsrtp ffmpeg  libx264 libopus)
