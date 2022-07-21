@@ -44,10 +44,9 @@ public:
     }
 
     std::string to_string() const {
-        std::string ret = ip_address;
-        ret += ":";
-        ret += std::to_string(port);
-        return ret;
+        char line[64];
+        sprintf(line, "%s:%d", ip_address.c_str(), port);
+        return line;
     }
 
 public:
@@ -101,9 +100,9 @@ public:
 
     void write(char* data, size_t len, udp_tuple remote_address) {
         struct sockaddr_in send_addr;
-        udp_req_info_t* req = (udp_req_info_t*)malloc(sizeof(udp_req_info_t));
         uv_ip4_addr(remote_address.ip_address.c_str(), ntohs(remote_address.port), &send_addr);
 
+        udp_req_info_t* req = (udp_req_info_t*)malloc(sizeof(udp_req_info_t));
         req->handle.data = this;
 
         char* new_data = (char*)malloc(len);

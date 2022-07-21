@@ -75,10 +75,8 @@ IF (WIN32)
 		# 根据实际情况，修改ffmpeg的安装路径，注意大于4.4的版本不行
         SET(FFMPEG_ROOT_DIR D:/Work/ffmpeg/v4.3)
         message(STATUS "found ffmpeg:${FFMPEG_ROOT_DIR}")
-        add_definitions(-DENABLE_FFMPEG)
         include_directories(${FFMPEG_ROOT_DIR}/include)
         link_directories(${FFMPEG_ROOT_DIR}/lib)
-        list(APPEND LIBS avfilter avformat avcodec avutil swscale swresample)
     endif()
 else()
     # set pkgconfig path
@@ -86,6 +84,7 @@ else()
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -Wno-deprecated -Wno-deprecated-declarations -Wno-reorder -Wall -fexceptions -frtti -D__STDC_FORMAT_MACROS -fPIC")
     #link_directories(${CMAKE_BINARY_DIR}/output/lib /usr/local/lib64 /usr/local/lib)
     link_directories(${CMAKE_BINARY_DIR}/output/lib /usr/local/lib64 /usr/local/lib)
+    set(LIBS ssl crypto)
 ENDIF()
 add_subdirectory(3rdparty)
 
@@ -222,6 +221,9 @@ SET(SRC_LIST src/media_server.cpp
     src/format/flv/flv_pub.hpp
     src/format/mpegts/mpegts_mux.cpp
     src/format/mpegts/mpegts_mux.hpp
+    src/format/mpegts/mpegts_demux.cpp
+    src/format/mpegts/mpegts_demux.hpp
+    src/format/mpegts/mpegts_pub.hpp
     src/format/audio_pub.hpp
     src/format/av_format_interface.hpp
     src/format/h264_header.hpp
@@ -378,6 +380,8 @@ SET(SRC_LIST src/media_server.cpp
     src/utils/av/gop_cache.hpp)
 
 IF(ENABLE_FFMPEG)
+    add_definitions(-DENABLE_FFMPEG)
+    list(APPEND LIBS avfilter avformat avcodec avutil swscale swresample)
     aux_source_directory(src/transcode SRC_LIST)
 ENDIF()
 
@@ -385,21 +389,14 @@ set_file_group(src ${SRC_LIST})
 add_executable(cpp_media_server ${SRC_LIST})
 
 add_dependencies(cpp_media_server sdptransform srtp2) #openssl libsrtp ffmpeg  libx264 libopus)
-
+list(APPEND LIBS srtp2 sdptransform uv)
 IF (APPLE)
-target_link_libraries(cpp_media_server pthread dl z m
-    srtp2 ssl crypto pthread sdptransform
-    avfilter avformat avcodec avutil postproc swscale swresample
-    uv)
+target_link_libraries(cpp_media_server ${LIBS} pthread dl z m)
 ELSEIF (UNIX)
 target_link_libraries(cpp_media_server
-    avfilter avformat avcodec avutil postproc swscale swresample
-    x264 fdk-aac opus
-    ssl crypto
-    srtp2 pthread sdptransform
-    pthread rt dl z m bz2
-    uv)
+    ${LIBS} pthread rt dl z m bz2
+    x264 fdk-aac opus)
 ELSEIF (WIN32)
-target_link_libraries(cpp_media_server ${LIBS} srtp2 uv_a sdptransform)
+target_link_libraries(cpp_media_server ${LIBS})
 ENDIF ()
 

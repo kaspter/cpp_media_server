@@ -39,7 +39,7 @@ private:
     int adaptation_bufinit(uint8_t* data, uint8_t data_size, uint8_t remain_bytes);
 
 private:
-    void ts_callback(MEDIA_PACKET_PTR pkt_ptr, uint8_t* data);
+    void ts_callback(uint8_t* data, MEDIA_PACKET_PTR pkt_ptr=nullptr);
 
 private:
     av_format_callback* cb_ = nullptr;

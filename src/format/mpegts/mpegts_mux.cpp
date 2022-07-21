@@ -52,12 +52,10 @@ static const uint32_t crc32table[256] = {
 
 static uint32_t mpeg_crc32(uint32_t crc, const uint8_t *buffer, uint32_t size)
 {  
-    unsigned int i;
-
-    for (i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         crc = crc32table[(crc ^ buffer[i]) & 0xff] ^ (crc >> 8);  
     }  
-    return crc ;  
+    return crc;
 }
 
 static uint8_t H264_AUD_DATA[] = {0x00, 0x00, 0x00, 0x01, 0x09, 0xff};
@@ -120,8 +118,7 @@ int mpegts_mux::write_pat() {
     if (ret < 0) {
         return ret;
     }
-    MEDIA_PACKET_PTR pkt_ptr;
-    ts_callback(pkt_ptr, pat_data_);
+    ts_callback(pat_data_);
     return 0;
 }
 
@@ -130,19 +127,12 @@ int mpegts_mux::write_pmt() {
     if (ret < 0) {
         return ret;
     }
-    MEDIA_PACKET_PTR pkt_ptr;
-    ts_callback(pkt_ptr, pmt_data_);
+    ts_callback(pmt_data_);
     return 0;
 }
 
 int mpegts_mux::input_packet(MEDIA_PACKET_PTR pkt_ptr) {
-    int ret = -1;
-
-    ret = write_pes(pkt_ptr);
-    if (ret < 0) {
-        return ret;
-    }
-    return 0;
+    return write_pes(pkt_ptr);
 }
 
 /*
@@ -636,16 +626,16 @@ int mpegts_mux::write_pes(MEDIA_PACKET_PTR pkt_ptr) {
             wBytes += data_len;
             packet_bytes_len -= data_len;
         }
-        ts_callback(pkt_ptr, ts_packet);
+        ts_callback(ts_packet, pkt_ptr);
         first = false;
     }
     return 0;
 }
 
-void mpegts_mux::ts_callback(MEDIA_PACKET_PTR pkt_ptr, uint8_t* data) {
+void mpegts_mux::ts_callback(uint8_t* data, MEDIA_PACKET_PTR pkt_ptr) {
     if (cb_) {
         MEDIA_PACKET_PTR ts_pkt_ptr = std::make_shared<MEDIA_PACKET>(256);
-        if (pkt_ptr.get() != nullptr) {
+        if (pkt_ptr) {
             ts_pkt_ptr->copy_properties(pkt_ptr);
         }
         

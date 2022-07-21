@@ -186,7 +186,7 @@ private:
     }
 
 private:
-    uint8_t data[1500];
+    uint8_t data[RTP_PACKET_MAX_SIZE];
     size_t  data_len = 0;
     rtcp_fb_common_header* fb_common_header_ = nullptr;
     rtcp_fb_header* nack_header_        = nullptr;

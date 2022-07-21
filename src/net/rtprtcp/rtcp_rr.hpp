@@ -178,6 +178,6 @@ public:
 private:
     rtcp_common_header* rtcp_header_ = nullptr;
     rtcp_rr_header* header_          = nullptr;
-    uint8_t data[1500];
+    uint8_t data[RTP_PACKET_MAX_SIZE];
 };
 #endif
