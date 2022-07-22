@@ -54,15 +54,16 @@ public:
 
     std::string dump() {
         std::stringstream ss;
-        
-        ss << "av type:" << avtype_tostring(av_type_) << ", codec type:" << codectype_tostring(codec_type_)
-           << ", format type:" << formattype_tostring(fmt_type_) << ", dts:" << dts_ << ", pts:" << pts_
-           << ", is key frame:" << is_key_frame_ << ", is seq frame:" << is_seq_hdr_
+        ss << "type:" << avtype_tostring(av_type_) << ", codec:" << codectype_tostring(codec_type_)
+           << ", format:" << formattype_tostring(fmt_type_) << ", dts:" << dts_ << ", pts:" << pts_
+           << (is_key_frame_?" keyframe":"") << (is_seq_hdr_?" seqframe":"")
            << ", key:" << key_ << ", app:" << app_ << ", stream name:" << streamname_
-           << ", data length:" << buffer_ptr_->data_len();
+           << ", length:" << buffer_ptr_->data_len();
         return ss.str();
     }
-
+    
+    char* data() {return buffer_ptr_->data();}
+    size_t size() const {return buffer_ptr_->data_len();}
 public:
     // 媒体类型：音频/视频
     MEDIA_PKT_TYPE av_type_      = MEDIA_UNKOWN_TYPE;

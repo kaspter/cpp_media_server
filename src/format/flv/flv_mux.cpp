@@ -28,11 +28,9 @@ int flv_muxer::input_packet(MEDIA_PACKET_PTR pkt_ptr) {
         //11 bytes header | 0x17 00 | 00 00 00 | data[...] | pre tag size
         media_size = 2 + 3 + data_size;
         header_data[0] = FLV_TAG_VIDEO;
-
     } else if (pkt_ptr->av_type_ == MEDIA_AUDIO_TYPE) {
         //11 bytes header | 0xaf 00 | data[...] | pre tag size
         media_size = 2 + data_size;
-
         header_data[0] = FLV_TAG_AUDIO;
     } else {
         log_warnf("flv mux does not suport media type:%d", (int)pkt_ptr->av_type_);
@@ -115,7 +113,7 @@ int flv_muxer::input_packet(MEDIA_PACKET_PTR pkt_ptr) {
     }
 
     output_pkt_ptr->buffer_ptr_->append_data((char*)header_data, header_size);
-    output_pkt_ptr->buffer_ptr_->append_data(pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len());
+    output_pkt_ptr->buffer_ptr_->append_data(pkt_ptr->data(), pkt_ptr->size());
 
     uint8_t pre_tag_size_p[4];
     pre_tag_size_p[0] = (pre_size >> 24) & 0xff;

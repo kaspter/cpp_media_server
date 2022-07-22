@@ -14,17 +14,7 @@ public:
 
 public:
     virtual int output_packet(MEDIA_PACKET_PTR pkt_ptr) {
-        std::stringstream desc;
-        desc << "key:" <<  pkt_ptr->key_
-            << ", av type:" << avtype_tostring(pkt_ptr->av_type_)
-            << ", codec type:" << codectype_tostring(pkt_ptr->codec_type_)
-            << ", fmt type:" << formattype_tostring(pkt_ptr->fmt_type_)
-            << ", dts" << pkt_ptr->dts_ << ", pts:" << pkt_ptr->pts_
-            << ", is key:" << pkt_ptr->is_key_frame_
-            << ", is seq hdr:" << pkt_ptr->is_seq_hdr_
-            << ", data len:" << pkt_ptr->buffer_ptr_->data_len();
-        
-        log_info_data((uint8_t*)pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len(), desc.str().c_str());
+        log_info_data((uint8_t*)pkt_ptr->data(), pkt_ptr->size(), pkt_ptr->dump().c_str());
         return 0;
     }
 };

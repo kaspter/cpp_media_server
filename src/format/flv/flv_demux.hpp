@@ -31,6 +31,7 @@ private:
     bool has_audio_ = false;
 
 private:
+    // flv协议解析状态机
     bool flv_header_ready_ = false;
     bool tag_header_ready_ = false;
 

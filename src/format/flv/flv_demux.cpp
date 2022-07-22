@@ -70,12 +70,15 @@ int flv_demuxer::handle_packet() {
     if (tag_type_ == FLV_TAG_AUDIO) {
         header_len = 2;
         output_pkt_ptr->av_type_ = MEDIA_AUDIO_TYPE;
-
-        if ((p[0] & 0xf0) == FLV_AUDIO_AAC_CODEC) {
+        switch (p[0] & 0xf0)
+        {
+        case FLV_AUDIO_AAC_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_AAC;
-        } else if ((p[0] & 0xf0) == FLV_AUDIO_OPUS_CODEC) {
+            break;
+        case FLV_AUDIO_OPUS_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_OPUS;
-        } else {
+            break;
+        default:
             is_ready = false;
             log_errorf("does not suport audio codec type:0x%02x", p[0]);
             return -1;
@@ -89,15 +92,21 @@ int flv_demuxer::handle_packet() {
     } else if (tag_type_ == FLV_TAG_VIDEO) {
         header_len = 2 + 3;
         output_pkt_ptr->av_type_ = MEDIA_VIDEO_TYPE;
-        if ((p[0]&0x0f) == FLV_VIDEO_H264_CODEC) {
+        switch (p[0]&0x0f)
+        {
+        case FLV_VIDEO_H264_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_H264;
-        } else if ((p[0]&0x0f) == FLV_VIDEO_H265_CODEC) {
+            break;
+        case FLV_VIDEO_H265_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_H265;
-        } else if ((p[0]&0x0f) == FLV_VIDEO_VP8_CODEC) {
+            break;
+        case FLV_VIDEO_VP8_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_VP8;
-        } else if ((p[0]&0x0f) == FLV_VIDEO_VP9_CODEC) {
+            break;
+        case FLV_VIDEO_VP9_CODEC:
             output_pkt_ptr->codec_type_ = MEDIA_CODEC_VP9;
-        } else {
+            break;
+        default:
             is_ready = false;
             log_errorf("does not support codec type:0x%02x.", p[0]);
             return -1;
@@ -138,7 +147,7 @@ int flv_demuxer::handle_packet() {
 }
 
 int flv_demuxer::input_packet(MEDIA_PACKET_PTR pkt_ptr) {
-    buffer_.append_data(pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len());
+    buffer_.append_data(pkt_ptr->data(), pkt_ptr->size());
     if (key_.empty() && !pkt_ptr->key_.empty()) {
         key_ = pkt_ptr->key_;
     }

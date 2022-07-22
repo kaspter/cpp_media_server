@@ -14,15 +14,7 @@ class media_callback : public av_format_callback
 {
 public:
     virtual int output_packet(MEDIA_PACKET_PTR pkt_ptr) {
-        std::stringstream ss;
-
-        ss << "demux av type:" << pkt_ptr->av_type_ << ", codec type:" << pkt_ptr->codec_type_
-           << ", is key:" << pkt_ptr->is_key_frame_ << ", is seqhdr:" << pkt_ptr->is_seq_hdr_
-           << ", dts:" << pkt_ptr->dts_ << ", pts:" << pkt_ptr->pts_
-           << ", stream key:" << pkt_ptr->key_ << ", data len:" << pkt_ptr->buffer_ptr_->data_len();
-        
-        log_infof("%s", ss.str().c_str());
-
+        log_infof("demux %s", pkt_ptr.dump().c_str());
         muxer_ptr->input_packet(pkt_ptr);
         return 0;
     }
@@ -32,19 +24,12 @@ class file_output_callback : public av_format_callback
 {
 public:
     virtual int output_packet(MEDIA_PACKET_PTR pkt_ptr) {
-        std::stringstream ss;
-
-        ss << "mux av type:" << pkt_ptr->av_type_ << ", codec type:" << pkt_ptr->codec_type_
-           << ", is key:" << pkt_ptr->is_key_frame_ << ", is seqhdr:" << pkt_ptr->is_seq_hdr_
-           << ", dts:" << pkt_ptr->dts_ << ", pts:" << pkt_ptr->pts_
-           << ", stream key:" << pkt_ptr->key_
-           << ", data len:" << pkt_ptr->buffer_ptr_->data_len();
-        
-        log_info_data((uint8_t*)pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len(), ss.str().c_str());
+        std::string val = "mux " + pkt_ptr->dump();
+        log_info_data((uint8_t*)pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len(), val.c_str());
 
         FILE* fh = fopen(dst_file.c_str(), "ab+");
         if (fh) {
-            fwrite(pkt_ptr->buffer_ptr_->data(), pkt_ptr->buffer_ptr_->data_len(), 1, fh);
+            fwrite(pkt_ptr->data(), pkt_ptr->size(), 1, fh);
             fclose(fh);
         }
         return 0;
